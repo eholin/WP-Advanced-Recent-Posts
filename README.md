@@ -19,15 +19,15 @@ Only one style of recent posts in widget
 
 ## TODO
 - [ ] Add more styles to widget
-  - [*] with Thumbnail (default 100px x 100px) and header at right
+  - [x] with Thumbnail (default 100px x 100px) and header at right
   - [ ] with large fluid image, header and excerpt at bottom
   - [ ] Without thumbnails, date as drop cap  
-- [*] Add shordcode support for displaying recent posts in the theme code
+- [x] Add shordcode support for displaying recent posts in the theme code
 - [ ] Add shortcode styles
   - [ ] Masonry with large (?) thumbnails
   - [ ] large (?) thumbnails with fixed height and width
   - [ ] large (?) fluid thumbnails with excerpt
-  - [*] with Thumbnail (default 100px x 100px) and header at right
-  - [*] Without thumbnails, date as drop cap
+  - [x] with Thumbnail (default 100px x 100px) and header at right
+  - [x] Without thumbnails, date as drop cap
   - [ ] one column and two column support
 - [ ] Add animation for widget
