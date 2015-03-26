@@ -1,0 +1,37 @@
+/* -------------------------- start admin style -------------------------- */
+
+/**
+ * 1
+/* -------------------------- SHORTCODES BACKEND -------------------------- */
+
+.lptw-sb-row {
+	clear: both;
+	margin: 10px 0;
+}
+
+
+.lptw-sb-result {
+	min-width: 700px;
+	min-height: 200px;
+}
+
+.layout-option {
+	float: left;
+	padding: 10px;
+}
+
+.layout-option:hover {
+	background-color: #ffffff;
+}
+
+.lptw-list-categories {
+	list-style: none;
+}
+
+.ready {
+	background-color: #FFF3E0;
+}
+
+#columns_and_width label {
+	padding-right: 20px;
+}

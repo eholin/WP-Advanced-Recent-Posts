@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy
-Version: 0.2
+Version: 0.3
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -61,6 +61,12 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		ob_start();
 
+        /* months localization */
+        $months_ru = Array(1 => "Янв", 2 => "Фев", 3 => "Мар", 4 => "Апр", 5 => "Май", 6 => "Июн", 7 => "Июл", 8 => "Авг", 9 => "Сен", 10 => "Окт", 11 => "Ноя", 12 => "Дек");
+        $months_full_ru = Array(1 => "Январь", 2 => "Февраль", 3 => "Март", 4 => "Апрель", 5 => "Май", 6 => "Июнь", 7 => "Июль", 8 => "Август", 9 => "Сентябрь", 10 => "Октябрь", 11 => "Ноябрь", 12 => "Декабрь");
+        $months_en = Array(1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun", 7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec");
+        $months_full_en = Array(1 => "January", 2 => "February", 3 => "March", 4 => "April", 5 => "May", 6 => "June", 7 => "July", 8 => "August", 9 => "September", 10 => "October", 11 => "November", 12 => "December");
+
 		$show_widget_title = isset( $instance['show_widget_title'] ) ? $instance['show_widget_title'] : true;
 		$exclude_current_post = isset( $instance['exclude_current_post'] ) ? $instance['exclude_current_post'] : true;
 
@@ -76,6 +82,24 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$show_post_title = isset( $instance['show_post_title'] ) ? $instance['show_post_title'] : true;
 
 		$color_scheme = isset( $instance['color_scheme'] ) ? $instance['color_scheme'] : 'light';
+
+		$locale = isset( $instance['locale'] ) ? $instance['locale'] : 'en';
+
+        /* choose months names in case of locale setting */
+        switch($locale) {
+            case 'ru':
+                $months = $months_ru;
+                $months_full = $months_full_ru;
+            break;
+            case 'en':
+                $months = $months_en;
+                $months_full = $months_full_en;
+            break;
+            default:
+                $months = $months_en;
+                $months_full = $months_full_en;
+            break;
+        }
 
         /* don't show post in recent if it shows in page */
         global $post;
@@ -100,6 +124,13 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		} ?>
 		<ul class="lptw-recent-posts-fluid-images-widget">
 		<?php while ( $r->have_posts() ) : $r->the_post(); ?>
+        <?php
+            $post_date = get_the_date();
+            $month_dig = date("n", strtotime($post_date));
+            $month_word = $months_full[$month_dig];
+        ?>
+
+
 			<li>
                 <?php if ( has_post_thumbnail() ) :
                     $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($r->post_ID), 'large' );
@@ -109,7 +140,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
                     <a href="<?php the_permalink(); ?>" class="lptw-post-thumbnail-link"><div class="overlay overlay-<?php echo $color_scheme; ?>"><img src="<?=$url?>" alt="<?php get_the_title() ? the_title() : the_ID(); ?>" /></div>
                     <div class="lptw-post-header">
         		    	<?php if ( $show_date ) : ?>
-    	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo get_the_date(); ?></span>
+    	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $month_word.' '.date("d, Y", strtotime($post_date)); ?></span>
         			    <?php endif; ?>
         		    	<?php if ( $show_post_title ) : ?>
     		    		<span class="lptw-post-title title-<?php echo $color_scheme; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
@@ -119,7 +150,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
                 </div>
                 <?php else : ?>
     			<?php if ( $show_date ) : ?>
-    				<span class="lptw-post-date"><?php echo get_the_date(); ?></span>
+    				<span class="lptw-post-date"><?php echo $month_word.' '.date("d, Y", strtotime($post_date)); ?></span>
     			<?php endif; ?>
 				<a href="<?php the_permalink(); ?>" class="lptw-post-title-link"><?php get_the_title() ? the_title() : the_ID(); ?></a>
                 <?php endif; ?>
@@ -164,6 +195,10 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         if ( isset( $instance[ 'color_scheme' ] ) ) { $color_scheme = $instance[ 'color_scheme' ] ; }
         else { $color_scheme = 'light'; }
 
+        if ( isset( $instance[ 'locale' ] ) ) { $locale = $instance[ 'locale' ] ; }
+        else { $locale = 'en'; }
+
+
         // Widget admin form
         ?>
         <p>
@@ -193,6 +228,14 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 			</select>
 		</p>
 
+		<p>
+			<label for="<?php echo $this->get_field_id('locale'); ?>"><?php _e( 'Locale:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'locale' ); ?>" id="<?php echo $this->get_field_id('locale'); ?>" class="widefat">
+				<option value="en"<?php selected( $locale, 'en' ); ?>><?php _e('English', 'lptw_recent_posts_domain'); ?></option>
+				<option value="ru"<?php selected( $locale, 'ru' ); ?>><?php _e('Russian', 'lptw_recent_posts_domain'); ?></option>
+			</select>
+		</p>
+
         </p>
         <?php
     }
@@ -206,6 +249,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
 		$instance['color_scheme'] = strip_tags($new_instance['color_scheme']);
+		$instance['locale'] = strip_tags($new_instance['locale']);
 		$this->flush_widget_cache();
 
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
@@ -263,6 +307,12 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		ob_start();
 
+        /* months localization */
+        $months_ru = Array(1 => "Янв", 2 => "Фев", 3 => "Мар", 4 => "Апр", 5 => "Май", 6 => "Июн", 7 => "Июл", 8 => "Авг", 9 => "Сен", 10 => "Окт", 11 => "Ноя", 12 => "Дек");
+        $months_full_ru = Array(1 => "Январь", 2 => "Февраль", 3 => "Март", 4 => "Апрель", 5 => "Май", 6 => "Июнь", 7 => "Июль", 8 => "Август", 9 => "Сентябрь", 10 => "Октябрь", 11 => "Ноябрь", 12 => "Декабрь");
+        $months_en = Array(1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun", 7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec");
+        $months_full_en = Array(1 => "January", 2 => "February", 3 => "March", 4 => "April", 5 => "May", 6 => "June", 7 => "July", 8 => "August", 9 => "September", 10 => "October", 11 => "November", 12 => "December");
+
 		$show_widget_title = isset( $instance['show_widget_title'] ) ? $instance['show_widget_title'] : true;
 		$exclude_current_post = isset( $instance['exclude_current_post'] ) ? $instance['exclude_current_post'] : true;
 
@@ -276,6 +326,24 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		$show_date = isset( $instance['show_date'] ) ? $instance['show_date'] : true;
 
 		$show_post_title = isset( $instance['show_post_title'] ) ? $instance['show_post_title'] : true;
+
+		$locale = isset( $instance['locale'] ) ? $instance['locale'] : 'en';
+
+        /* choose months names in case of locale setting */
+        switch($locale) {
+            case 'ru':
+                $months = $months_ru;
+                $months_full = $months_full_ru;
+            break;
+            case 'en':
+                $months = $months_en;
+                $months_full = $months_full_en;
+            break;
+            default:
+                $months = $months_en;
+                $months_full = $months_full_en;
+            break;
+        }
 
         /* don't show post in recent if it shows in page */
         global $post;
@@ -298,14 +366,20 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		<?php if ( $title && $show_widget_title == true) {
 			echo $args['before_title'] . $title . $args['after_title'];
 		} ?>
-		<ul class="lptw-recent-posts-fluid-images-widget">
+		<ul class="lptw-recent-posts-thumbnails-widget">
 		<?php while ( $r->have_posts() ) : $r->the_post(); ?>
+        <?php
+            $post_date = get_the_date();
+            $month_dig = date("n", strtotime($post_date));
+            $month_word = $months_full[$month_dig];
+        ?>
+
 			<li>
                 <div class="lptw-post-small-thumbnail">
                     <a href="<?php the_permalink(); ?>" class="lptw-thumbnail-link"><?php if ( has_post_thumbnail() ) {the_post_thumbnail( array(100, 100) );} ?></a>
                     <div class="lptw-post-header">
         		    	<?php if ( $show_date ) : ?>
-        	    		<span class="lptw-post-date"><?php echo get_the_date(); ?></span>
+        	    		<span class="lptw-post-date"><?php echo $month_word.' '.date("d, Y", strtotime($post_date)); ?></span>
         			    <?php endif; ?>
         		    	<?php if ( $show_post_title ) : ?>
         		    	<a href="<?php the_permalink(); ?>" class="lptw-header-link"><?php get_the_title() ? the_title() : the_ID(); ?></a>
@@ -350,6 +424,9 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
         if ( isset( $instance[ 'show_date' ] ) ) { $show_date = (bool) $instance[ 'show_date' ]; }
         else { $show_date = false; }
 
+        if ( isset( $instance[ 'locale' ] ) ) { $locale = $instance[ 'locale' ] ; }
+        else { $locale = 'en'; }
+
         // Widget admin form
         ?>
         <p>
@@ -371,6 +448,14 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_post_title ); ?> id="<?php echo $this->get_field_id( 'show_post_title' ); ?>" name="<?php echo $this->get_field_name( 'show_post_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_post_title' ); ?>"><?php _e( 'Display post title?', 'lptw_recent_posts_domain' ); ?></label></p>
 
+		<p>
+			<label for="<?php echo $this->get_field_id('locale'); ?>"><?php _e( 'Locale:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'locale' ); ?>" id="<?php echo $this->get_field_id('locale'); ?>" class="widefat">
+				<option value="en"<?php selected( $locale, 'en' ); ?>><?php _e('English', 'lptw_recent_posts_domain'); ?></option>
+				<option value="ru"<?php selected( $locale, 'ru' ); ?>><?php _e('Russian', 'lptw_recent_posts_domain'); ?></option>
+			</select>
+		</p>
+
         </p>
         <?php
     }
@@ -383,6 +468,7 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		$instance['number'] = (int) $new_instance['number'];
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
+		$instance['locale'] = strip_tags($new_instance['locale']);
 		$this->flush_widget_cache();
 
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
@@ -415,7 +501,9 @@ add_action( 'widgets_init', 'lptw_recent_posts_load_widget' );
 function lptw_display_recent_posts ( $atts ) {
     /* months localization */
     $months_ru = Array(1 => "Янв", 2 => "Фев", 3 => "Мар", 4 => "Апр", 5 => "Май", 6 => "Июн", 7 => "Июл", 8 => "Авг", 9 => "Сен", 10 => "Окт", 11 => "Ноя", 12 => "Дек");
+    $months_full_ru = Array(1 => "Январь", 2 => "Февраль", 3 => "Март", 4 => "Апрель", 5 => "Май", 6 => "Июнь", 7 => "Июль", 8 => "Август", 9 => "Сентябрь", 10 => "Октябрь", 11 => "Ноябрь", 12 => "Декабрь");
     $months_en = Array(1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun", 7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec");
+    $months_full_en = Array(1 => "January", 2 => "February", 3 => "March", 4 => "April", 5 => "May", 6 => "June", 7 => "July", 8 => "August", 9 => "September", 10 => "October", 11 => "November", 12 => "December");
 
     $default_posts_per_page =  get_option( 'posts_per_page', '10' );
 
@@ -429,16 +517,27 @@ function lptw_display_recent_posts ( $atts ) {
         'layout'            => 'overlay',
         'color_scheme'      => 'light',
         'show_date'         => 'true',
+        'fluid_images'      => 'false',
+        'columns'           => '1',
         'height'            => '',
-        'width'             => '',
+        'width'             => '300',
         'locale'            => 'en'
     ), $atts );
 
     /* choose months names in case of locale setting */
     switch($a['locale']) {
-        case 'ru': $months = $months_ru; break;
-        case 'en': $months = $months_en; break;
-        default: $months = $months_en; break;
+        case 'ru':
+            $months = $months_ru;
+            $months_full = $months_full_ru;
+        break;
+        case 'en':
+            $months = $months_en;
+            $months_full = $months_full_en;
+        break;
+        default:
+            $months = $months_en;
+            $months_full = $months_full_en;
+        break;
     }
 
     if ($a['width'] != '' || $a['height'] != '') {
@@ -447,6 +546,12 @@ function lptw_display_recent_posts ( $atts ) {
         if ($a['height'] != '') {$dim_style .= 'height:'.$a['height'].'px;';}
         $dim_style .= '"';
     }
+
+    if ($a['fluid_images'] == 'true') { $dim_style = 'style="width:100%;"'; }
+
+    if ($a['columns'] < 1) {$a['columns'] = 1;}
+    elseif ($a['columns'] > 2) {$a['columns'] = 2;}
+    $column_style = 'columns-'.$a['columns'];
 
     $args = array(
         'post_type'       => $a['post_type'],
@@ -458,6 +563,7 @@ function lptw_display_recent_posts ( $atts ) {
     $allnews = new WP_Query( $args );
     if( $allnews->have_posts() ) {
         $i=0;
+        $content = '';
         while( $allnews->have_posts() ) {
             $allnews->the_post();
             $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($allnews->post_ID), $a['thumbnail_size'] );
@@ -470,73 +576,89 @@ function lptw_display_recent_posts ( $atts ) {
                     $url = $thumb['0'];
                 }
             }
+
+            if ($a['columns'] > 1) {
+                if (($i % 2) == 1) {$cell_style = 'last-cell';}
+                else {$cell_style = 'inner-cell';}
+            } else {$cell_style = 'last-cell';}
+
             /* start layouts output */
-            /* basic layout - now only for stomatolog-tula.ru */
-            /* the basic layout may be converted to one or two columns layout in future */
+            /* basic layout - one or tho columns, fixed or adaptive width */
             if ($a['layout'] == 'basic' ) {
-            ?>
-            <article style="background-image:url(<?=$url?>);" class="basic-layout all-news-article">
+            $post_date = get_the_date();
+            $month_dig = date("n", strtotime($post_date));
+            $month_word = $months_full[$month_dig];
+
+            $content .= '
+            <article class="basic-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
                 <header>
-                    <a href="<? the_permalink(); ?>" class="news-header"><span class="news-date"><?php echo get_the_date(); ?></span> &rarr; <?php the_title(); ?></a>
-                </header>
-            </article>
-            <?php
-            /* fluid images with dark/light overlay */
-            } elseif ($a['layout'] == 'overlay' ) {
-            ?>
-            <article class="overlay-layout lptw-post-thumbnail" <?php echo $dim_style != '' ? $dim_style : ''; ?>>
-                <header>
-                    <a href="<?php the_permalink(); ?>" class="lptw-post-thumbnail-link fluid"><div class="overlay overlay-<?php echo $a['color_scheme']; ?>"><img src="<?=$url?>" alt="<?php get_the_title() ? the_title() : the_ID(); ?>" /></div>
-                    <div class="lptw-post-header">
-        		    	<?php if ( $a['show_date'] ) : ?>
-    	    			<span class="lptw-post-date date-<?php echo $a['color_scheme']; ?>"><?php echo get_the_date(); ?></span>
-        			    <?php endif; ?>
-    		    		<span class="lptw-post-title title-<?php echo $a['color_scheme']; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
+                    <a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>
+                    <div class="lptw-post-header">';
+        	if ( $a['show_date'] ) {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$month_word.' '.date("d, Y", strtotime($post_date)).'</span>';}
+    		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>
                     </div>
                     </a>
                 </header>
-            </article>
-            <?php
+            </article>';
+
             /* small thumbnails */
             } elseif ($a['layout'] == 'thumbnail' ) {
-            ?>
-            <article class="thumbnail-layout">
-                <a href="<?php the_permalink(); ?>" class="lptw-thumbnail-link"><?php the_post_thumbnail( array(100, 100) ); ?></a>
-                <header class="lptw-post-header">
-        		    <?php if ( $a['show_date'] ) : ?>
-    	    		<span class="lptw-post-date"><?php echo get_the_date(); ?></span>
-        			<?php endif; ?>
-    		    	<span class="lptw-post-title"><?php get_the_title() ? the_title() : the_ID(); ?></span>
+            $post_date = get_the_date();
+            $month_dig = date("n", strtotime($post_date));
+            $month_word = $months_full[$month_dig];
+            $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($allnews->post_ID), array ( 100,100 ) );
+            $url_100 = $thumb_100['0'];
+            $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
+                <a href="'.get_the_permalink().'" class="lptw-thumbnail-link"><img src="'.$url_100.'" width="100" height="100" alt="'.get_the_title().'" /></a>
+                <header class="lptw-post-header">';
+        	if ( $a['show_date'] ) { $content .= '<span class="lptw-post-date">'.$month_word.' '.date("d, Y", strtotime($post_date)).'</span>'; }
+    		    	$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>
                 </header>
-            </article>
-            <?php
+            </article>';
+
             /* recent posts without thumbnails, with date as drop cap */
             /* the months are localized */
             } elseif ($a['layout'] == 'dropcap' ) {
                 $post_date = get_the_date();
                 $month_dig = date("n", strtotime($post_date));
                 $month_word = $months[$month_dig];
-            ?>
-            <article class="dropcap-layout our-news-article">
+            $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
                 <header>
-                    <div class="our-date">
-                        <span class="day"><?php echo date("d", strtotime($post_date)); ?></span>
-                        <span class="month"><?php echo $month_word; ?>.<?php echo date("Y", strtotime($post_date)); ?></span>
+                    <div class="lptw-dropcap-date">
+                        <span class="lptw-dropcap-day">'.date("d", strtotime($post_date)).'</span>
+                        <span class="lptw-dropcap-month">'.$month_word.'.'.date("Y", strtotime($post_date)).'</span>
                     </div>
-                    <p><a class="slist" href="<?php the_permalink(); ?>"><?php the_title(); ?></a></p>
+                    <a class="lptw-dropcap-date-link" href="'.get_the_permalink().'">'.get_the_title().'</a>
                 </header>
-            </article>
-            <?php
+            </article>';
             }
             $i++;
         } // end while( $allnews->have_posts() )
+        return $content;
     } else {
-        echo _e( 'No recent posts', 'lptw_recent_posts_domain' );
+        return __( 'No recent posts', 'lptw_recent_posts_domain' );
     }
-
 }
 
 add_shortcode( 'lptw_recentposts', 'lptw_display_recent_posts' );
 
+/*
+ * Add Shortcode Builder
+ */
+function lptw_register_recent_posts_menu_page(){
+    add_menu_page( 'Advanced Recent Posts', 'Advanced Recent Posts', 'manage_options', 'recent_posts', 'lptw_recent_posts_manage_shortcodes', 'dashicons-editor-code', 100 );
+}
+add_action( 'admin_menu', 'lptw_register_recent_posts_menu_page' );
+
+function lptw_recent_posts_backend_scripts() {
+	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'lptw-recent-posts/backend/lptw-recent-posts-backend.css' ) );
+	wp_enqueue_style('lptw-recent-posts-backend-style' );
+
+    wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'lptw-recent-posts/backend/lptw-recent-posts-shortcode-builder.js' ), array(), '0.3', true );
+}
+add_action( 'admin_enqueue_scripts', 'lptw_recent_posts_backend_scripts' );
+
+/* include shortcode builder  */
+include( plugin_dir_path( __FILE__ ) . 'backend/lptw-recent-posts-backend.php');
 
 ?>
