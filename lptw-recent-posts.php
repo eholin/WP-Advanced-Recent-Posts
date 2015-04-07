@@ -13,7 +13,7 @@ Text Domain: lptw_recent_posts_domain
 
 /* load js and css styles */
 function lptw_recent_posts_register_scripts() {
-	wp_register_style( 'lptw-style', plugins_url( 'lptw-recent-posts/lptw-recent-posts.css' ) );
+	wp_register_style( 'lptw-style', plugins_url( 'lptw-recent-posts.css', __FILE__ ) );
 	wp_enqueue_style( 'lptw-style' );
 }
 
@@ -137,7 +137,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
                     $url = $thumb['0'];
                 ?>
 				<div class="lptw-post-thumbnail">
-                    <a href="<?php the_permalink(); ?>" class="lptw-post-thumbnail-link"><div class="overlay overlay-<?php echo $color_scheme; ?>"><img src="<?=$url?>" alt="<?php get_the_title() ? the_title() : the_ID(); ?>" /></div>
+                    <a href="<?php the_permalink(); ?>" class="lptw-post-thumbnail-link"><div class="overlay overlay-<?php echo $color_scheme; ?>"><img src="<?php echo $url; ?>" alt="<?php get_the_title() ? the_title() : the_ID(); ?>" /></div>
                     <div class="lptw-post-header">
         		    	<?php if ( $show_date ) : ?>
     	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $month_word.' '.date("d, Y", strtotime($post_date)); ?></span>
@@ -651,10 +651,10 @@ function lptw_register_recent_posts_menu_page(){
 add_action( 'admin_menu', 'lptw_register_recent_posts_menu_page' );
 
 function lptw_recent_posts_backend_scripts() {
-	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'lptw-recent-posts/backend/lptw-recent-posts-backend.css' ) );
+	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
 	wp_enqueue_style('lptw-recent-posts-backend-style' );
 
-    wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'lptw-recent-posts/backend/lptw-recent-posts-shortcode-builder.js' ), array(), '0.3', true );
+    wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'backend/lptw-recent-posts-shortcode-builder.js', __FILE__ ), array(), '0.3', true );
 }
 add_action( 'admin_enqueue_scripts', 'lptw_recent_posts_backend_scripts' );
 
