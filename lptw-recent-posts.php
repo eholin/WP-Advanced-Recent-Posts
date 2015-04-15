@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy
-Version: 0.3
+Version: 0.4
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -61,12 +61,6 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		ob_start();
 
-        /* months localization */
-        $months_ru = Array(1 => "Янв", 2 => "Фев", 3 => "Мар", 4 => "Апр", 5 => "Май", 6 => "Июн", 7 => "Июл", 8 => "Авг", 9 => "Сен", 10 => "Окт", 11 => "Ноя", 12 => "Дек");
-        $months_full_ru = Array(1 => "Январь", 2 => "Февраль", 3 => "Март", 4 => "Апрель", 5 => "Май", 6 => "Июнь", 7 => "Июль", 8 => "Август", 9 => "Сентябрь", 10 => "Октябрь", 11 => "Ноябрь", 12 => "Декабрь");
-        $months_en = Array(1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun", 7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec");
-        $months_full_en = Array(1 => "January", 2 => "February", 3 => "March", 4 => "April", 5 => "May", 6 => "June", 7 => "July", 8 => "August", 9 => "September", 10 => "October", 11 => "November", 12 => "December");
-
 		$show_widget_title = isset( $instance['show_widget_title'] ) ? $instance['show_widget_title'] : true;
 		$exclude_current_post = isset( $instance['exclude_current_post'] ) ? $instance['exclude_current_post'] : true;
 
@@ -79,27 +73,17 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		$show_date = isset( $instance['show_date'] ) ? $instance['show_date'] : true;
 
+		$date_format = isset( $instance['date_format'] ) ? $instance['date_format'] : 'm/d/Y';
+
+		$time_format = isset( $instance['time_format'] ) ? $instance['time_format'] : 'g:i a';
+
+		$show_time = isset( $instance['show_time'] ) ? $instance['show_time'] : true;
+
+		$show_time_before = isset( $instance['show_time_before'] ) ? $instance['show_time_before'] : true;
+
 		$show_post_title = isset( $instance['show_post_title'] ) ? $instance['show_post_title'] : true;
 
 		$color_scheme = isset( $instance['color_scheme'] ) ? $instance['color_scheme'] : 'light';
-
-		$locale = isset( $instance['locale'] ) ? $instance['locale'] : 'en';
-
-        /* choose months names in case of locale setting */
-        switch($locale) {
-            case 'ru':
-                $months = $months_ru;
-                $months_full = $months_full_ru;
-            break;
-            case 'en':
-                $months = $months_en;
-                $months_full = $months_full_en;
-            break;
-            default:
-                $months = $months_en;
-                $months_full = $months_full_en;
-            break;
-        }
 
         /* don't show post in recent if it shows in page */
         global $post;
@@ -125,9 +109,13 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		<ul class="lptw-recent-posts-fluid-images-widget">
 		<?php while ( $r->have_posts() ) : $r->the_post(); ?>
         <?php
-            $post_date = get_the_date();
-            $month_dig = date("n", strtotime($post_date));
-            $month_word = $months_full[$month_dig];
+            $post_date = get_the_date($date_format);
+            $post_time = get_the_date($time_format);
+            if ($show_time == true) {
+                if ($show_time_before == true) { $post_date_time = $post_time . ' ' . $post_date; }
+                else { $post_date_time = $post_date . ' ' . $post_time; }
+            }
+            else { $post_date_time = $post_date; }
         ?>
 
 
@@ -139,8 +127,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 				<div class="lptw-post-thumbnail">
                     <a href="<?php the_permalink(); ?>" class="lptw-post-thumbnail-link"><div class="overlay overlay-<?php echo $color_scheme; ?>"><img src="<?php echo $url; ?>" alt="<?php get_the_title() ? the_title() : the_ID(); ?>" /></div>
                     <div class="lptw-post-header">
-        		    	<?php if ( $show_date ) : ?>
-    	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $month_word.' '.date("d, Y", strtotime($post_date)); ?></span>
+        		    	<?php if ( $show_date == true ) : ?>
+    	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $post_date_time; ?></span>
         			    <?php endif; ?>
         		    	<?php if ( $show_post_title ) : ?>
     		    		<span class="lptw-post-title title-<?php echo $color_scheme; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
@@ -149,8 +137,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
                     </a>
                 </div>
                 <?php else : ?>
-    			<?php if ( $show_date ) : ?>
-    				<span class="lptw-post-date"><?php echo $month_word.' '.date("d, Y", strtotime($post_date)); ?></span>
+    			<?php if ( $show_date == true ) : ?>
+    				<span class="lptw-post-date"><?php echo $post_date; ?></span>
     			<?php endif; ?>
 				<a href="<?php the_permalink(); ?>" class="lptw-post-title-link"><?php get_the_title() ? the_title() : the_ID(); ?></a>
                 <?php endif; ?>
@@ -192,11 +180,20 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         if ( isset( $instance[ 'show_date' ] ) ) { $show_date = (bool) $instance[ 'show_date' ]; }
         else { $show_date = false; }
 
+        if ( isset( $instance[ 'date_format' ] ) ) { $date_format = $instance[ 'date_format' ]; }
+        else { $date_format = 'm/d/Y'; }
+
+        if ( isset( $instance[ 'time_format' ] ) ) { $time_format = $instance[ 'time_format' ]; }
+        else { $time_format = 'g:i a'; }
+
+        if ( isset( $instance[ 'show_time' ] ) ) { $show_time = (bool) $instance[ 'show_time' ]; }
+        else { $show_time = false; }
+
+        if ( isset( $instance[ 'show_time_before' ] ) ) { $show_time_before = (bool) $instance[ 'show_time_before' ]; }
+        else { $show_time_before = false; }
+
         if ( isset( $instance[ 'color_scheme' ] ) ) { $color_scheme = $instance[ 'color_scheme' ] ; }
         else { $color_scheme = 'light'; }
-
-        if ( isset( $instance[ 'locale' ] ) ) { $locale = $instance[ 'locale' ] ; }
-        else { $locale = 'en'; }
 
 
         // Widget admin form
@@ -217,6 +214,30 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>" name="<?php echo $this->get_field_name( 'show_date' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php _e( 'Display post date?', 'lptw_recent_posts_domain' ); ?></label></p>
 
+		<p>
+			<label for="<?php echo $this->get_field_id('date_format'); ?>"><?php _e( 'Date format:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'date_format' ); ?>" id="<?php echo $this->get_field_id('date_format'); ?>" class="widefat">
+				<option value="d.m.Y"<?php selected( $date_format, 'd.m.Y' ); ?>><?php echo date('d.m.Y') ?></option>
+				<option value="m/d/Y"<?php selected( $date_format, 'm/d/Y' ); ?>><?php echo date('m/d/Y'); ?></option>
+				<option value="d/m/Y"<?php selected( $date_format, 'd/m/Y' ); ?>><?php echo date('d/m/Y'); ?></option>
+				<option value="F j, Y"<?php selected( $date_format, 'F j, Y' ); ?>><?php echo date('F j, Y'); ?></option>
+				<option value="M j, Y"<?php selected( $date_format, 'M j, Y' ); ?>><?php echo date('M j, Y'); ?></option>
+			</select>
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('time_format'); ?>"><?php _e( 'Time format:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'time_format' ); ?>" id="<?php echo $this->get_field_id('time_format'); ?>" class="widefat">
+				<option value="H:i"<?php selected( $time_format, 'H:i' ); ?>><?php echo date('H:i') ?></option>
+				<option value="H:i:s"<?php selected( $time_format, 'H:i:s' ); ?>><?php echo date('H:i:s'); ?></option>
+				<option value="g:i a"<?php selected( $time_format, 'g:i a' ); ?>><?php echo date('g:i a'); ?></option>
+				<option value="g:i:s a"<?php selected( $time_format, 'g:i:s a' ); ?>><?php echo date('g:i:s a'); ?></option>
+			</select>
+		</p>
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_time ); ?> id="<?php echo $this->get_field_id( 'show_time' ); ?>" name="<?php echo $this->get_field_name( 'show_time' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_time' ); ?>"><?php _e( 'Display post time?', 'lptw_recent_posts_domain' ); ?></label></p>
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_time_before ); ?> id="<?php echo $this->get_field_id( 'show_time_before' ); ?>" name="<?php echo $this->get_field_name( 'show_time_before' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_time_before' ); ?>" title="<?php _e( 'By default post time displays after post date.', 'lptw_recent_posts_domain' );?>"><?php _e( 'Display post time before post date?', 'lptw_recent_posts_domain' ); ?></label></p>
+
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_post_title ); ?> id="<?php echo $this->get_field_id( 'show_post_title' ); ?>" name="<?php echo $this->get_field_name( 'show_post_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_post_title' ); ?>"><?php _e( 'Display post title?', 'lptw_recent_posts_domain' ); ?></label></p>
 
@@ -225,14 +246,6 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 			<select name="<?php echo $this->get_field_name( 'color_scheme' ); ?>" id="<?php echo $this->get_field_id('color_scheme'); ?>" class="widefat">
 				<option value="light"<?php selected( $color_scheme, 'light' ); ?>><?php _e('Light', 'lptw_recent_posts_domain'); ?></option>
 				<option value="dark"<?php selected( $color_scheme, 'dark' ); ?>><?php _e('Dark', 'lptw_recent_posts_domain'); ?></option>
-			</select>
-		</p>
-
-		<p>
-			<label for="<?php echo $this->get_field_id('locale'); ?>"><?php _e( 'Locale:', 'lptw_recent_posts_domain' ); ?></label>
-			<select name="<?php echo $this->get_field_name( 'locale' ); ?>" id="<?php echo $this->get_field_id('locale'); ?>" class="widefat">
-				<option value="en"<?php selected( $locale, 'en' ); ?>><?php _e('English', 'lptw_recent_posts_domain'); ?></option>
-				<option value="ru"<?php selected( $locale, 'ru' ); ?>><?php _e('Russian', 'lptw_recent_posts_domain'); ?></option>
 			</select>
 		</p>
 
@@ -248,8 +261,11 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$instance['number'] = (int) $new_instance['number'];
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
+		$instance['date_format'] = strip_tags($new_instance['date_format']);
+		$instance['time_format'] = strip_tags($new_instance['time_format']);
+		$instance['show_time'] = isset( $new_instance['show_time'] ) ? (bool) $new_instance['show_time'] : false;
+		$instance['show_time_before'] = isset( $new_instance['show_time_before'] ) ? (bool) $new_instance['show_time_before'] : false;
 		$instance['color_scheme'] = strip_tags($new_instance['color_scheme']);
-		$instance['locale'] = strip_tags($new_instance['locale']);
 		$this->flush_widget_cache();
 
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
@@ -307,12 +323,6 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		ob_start();
 
-        /* months localization */
-        $months_ru = Array(1 => "Янв", 2 => "Фев", 3 => "Мар", 4 => "Апр", 5 => "Май", 6 => "Июн", 7 => "Июл", 8 => "Авг", 9 => "Сен", 10 => "Окт", 11 => "Ноя", 12 => "Дек");
-        $months_full_ru = Array(1 => "Январь", 2 => "Февраль", 3 => "Март", 4 => "Апрель", 5 => "Май", 6 => "Июнь", 7 => "Июль", 8 => "Август", 9 => "Сентябрь", 10 => "Октябрь", 11 => "Ноябрь", 12 => "Декабрь");
-        $months_en = Array(1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun", 7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec");
-        $months_full_en = Array(1 => "January", 2 => "February", 3 => "March", 4 => "April", 5 => "May", 6 => "June", 7 => "July", 8 => "August", 9 => "September", 10 => "October", 11 => "November", 12 => "December");
-
 		$show_widget_title = isset( $instance['show_widget_title'] ) ? $instance['show_widget_title'] : true;
 		$exclude_current_post = isset( $instance['exclude_current_post'] ) ? $instance['exclude_current_post'] : true;
 
@@ -325,25 +335,15 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		$show_date = isset( $instance['show_date'] ) ? $instance['show_date'] : true;
 
+		$date_format = isset( $instance['date_format'] ) ? $instance['date_format'] : 'm/d/Y';
+
+		$time_format = isset( $instance['time_format'] ) ? $instance['time_format'] : 'g:i a';
+
+		$show_time = isset( $instance['show_time'] ) ? $instance['show_time'] : true;
+
+		$show_time_before = isset( $instance['show_time_before'] ) ? $instance['show_time_before'] : true;
+
 		$show_post_title = isset( $instance['show_post_title'] ) ? $instance['show_post_title'] : true;
-
-		$locale = isset( $instance['locale'] ) ? $instance['locale'] : 'en';
-
-        /* choose months names in case of locale setting */
-        switch($locale) {
-            case 'ru':
-                $months = $months_ru;
-                $months_full = $months_full_ru;
-            break;
-            case 'en':
-                $months = $months_en;
-                $months_full = $months_full_en;
-            break;
-            default:
-                $months = $months_en;
-                $months_full = $months_full_en;
-            break;
-        }
 
         /* don't show post in recent if it shows in page */
         global $post;
@@ -369,17 +369,21 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		<ul class="lptw-recent-posts-thumbnails-widget">
 		<?php while ( $r->have_posts() ) : $r->the_post(); ?>
         <?php
-            $post_date = get_the_date();
-            $month_dig = date("n", strtotime($post_date));
-            $month_word = $months_full[$month_dig];
+            $post_date = get_the_date($date_format);
+            $post_time = get_the_date($time_format);
+            if ($show_time == true) {
+                if ($show_time_before == true) { $post_date_time = $post_time . ' ' . $post_date; }
+                else { $post_date_time = $post_date . ' ' . $post_time; }
+            }
+            else { $post_date_time = $post_date; }
         ?>
 
 			<li>
                 <div class="lptw-post-small-thumbnail">
                     <a href="<?php the_permalink(); ?>" class="lptw-thumbnail-link"><?php if ( has_post_thumbnail() ) {the_post_thumbnail( array(100, 100) );} ?></a>
                     <div class="lptw-post-header">
-        		    	<?php if ( $show_date ) : ?>
-        	    		<span class="lptw-post-date"><?php echo $month_word.' '.date("d, Y", strtotime($post_date)); ?></span>
+        		    	<?php if ( $show_date == true ) : ?>
+        	    		<span class="lptw-post-date"><?php echo $post_date_time; ?></span>
         			    <?php endif; ?>
         		    	<?php if ( $show_post_title ) : ?>
         		    	<a href="<?php the_permalink(); ?>" class="lptw-header-link"><?php get_the_title() ? the_title() : the_ID(); ?></a>
@@ -424,8 +428,17 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
         if ( isset( $instance[ 'show_date' ] ) ) { $show_date = (bool) $instance[ 'show_date' ]; }
         else { $show_date = false; }
 
-        if ( isset( $instance[ 'locale' ] ) ) { $locale = $instance[ 'locale' ] ; }
-        else { $locale = 'en'; }
+        if ( isset( $instance[ 'date_format' ] ) ) { $date_format = $instance[ 'date_format' ]; }
+        else { $date_format = 'd.m.Y'; }
+
+        if ( isset( $instance[ 'time_format' ] ) ) { $time_format = $instance[ 'time_format' ]; }
+        else { $time_format = 'H:i'; }
+
+        if ( isset( $instance[ 'show_time' ] ) ) { $show_time = (bool) $instance[ 'show_time' ]; }
+        else { $show_time = false; }
+
+        if ( isset( $instance[ 'show_time_before' ] ) ) { $show_time_before = (bool) $instance[ 'show_time_before' ]; }
+        else { $show_time_before = false; }
 
         // Widget admin form
         ?>
@@ -445,16 +458,32 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>" name="<?php echo $this->get_field_name( 'show_date' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php _e( 'Display post date?', 'lptw_recent_posts_domain' ); ?></label></p>
 
-		<p><input class="checkbox" type="checkbox" <?php checked( $show_post_title ); ?> id="<?php echo $this->get_field_id( 'show_post_title' ); ?>" name="<?php echo $this->get_field_name( 'show_post_title' ); ?>" />
-		<label for="<?php echo $this->get_field_id( 'show_post_title' ); ?>"><?php _e( 'Display post title?', 'lptw_recent_posts_domain' ); ?></label></p>
-
 		<p>
-			<label for="<?php echo $this->get_field_id('locale'); ?>"><?php _e( 'Locale:', 'lptw_recent_posts_domain' ); ?></label>
-			<select name="<?php echo $this->get_field_name( 'locale' ); ?>" id="<?php echo $this->get_field_id('locale'); ?>" class="widefat">
-				<option value="en"<?php selected( $locale, 'en' ); ?>><?php _e('English', 'lptw_recent_posts_domain'); ?></option>
-				<option value="ru"<?php selected( $locale, 'ru' ); ?>><?php _e('Russian', 'lptw_recent_posts_domain'); ?></option>
+			<label for="<?php echo $this->get_field_id('date_format'); ?>"><?php _e( 'Date format:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'date_format' ); ?>" id="<?php echo $this->get_field_id('date_format'); ?>" class="widefat">
+				<option value="d.m.Y"<?php selected( $date_format, 'd.m.Y' ); ?>><?php echo date('d.m.Y') ?></option>
+				<option value="m/d/Y"<?php selected( $date_format, 'm/d/Y' ); ?>><?php echo date('m/d/Y'); ?></option>
+				<option value="d/m/Y"<?php selected( $date_format, 'd/m/Y' ); ?>><?php echo date('d/m/Y'); ?></option>
+				<option value="F j, Y"<?php selected( $date_format, 'F j, Y' ); ?>><?php echo date('F j, Y'); ?></option>
+				<option value="M j, Y"<?php selected( $date_format, 'M j, Y' ); ?>><?php echo date('M j, Y'); ?></option>
 			</select>
 		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('time_format'); ?>"><?php _e( 'Time format:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'time_format' ); ?>" id="<?php echo $this->get_field_id('time_format'); ?>" class="widefat">
+				<option value="H:i"<?php selected( $time_format, 'H:i' ); ?>><?php echo date('H:i') ?></option>
+				<option value="H:i:s"<?php selected( $time_format, 'H:i:s' ); ?>><?php echo date('H:i:s'); ?></option>
+				<option value="g:i a"<?php selected( $time_format, 'g:i a' ); ?>><?php echo date('g:i a'); ?></option>
+				<option value="g:i:s a"<?php selected( $time_format, 'g:i:s a' ); ?>><?php echo date('g:i:s a'); ?></option>
+			</select>
+		</p>
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_time ); ?> id="<?php echo $this->get_field_id( 'show_time' ); ?>" name="<?php echo $this->get_field_name( 'show_time' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_time' ); ?>"><?php _e( 'Display post time?', 'lptw_recent_posts_domain' ); ?></label></p>
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_time_before ); ?> id="<?php echo $this->get_field_id( 'show_time_before' ); ?>" name="<?php echo $this->get_field_name( 'show_time_before' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_time_before' ); ?>" title="<?php _e( 'By default post time displays after post date.', 'lptw_recent_posts_domain' );?>"><?php _e( 'Display post time before post date?', 'lptw_recent_posts_domain' ); ?></label></p>
+
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_post_title ); ?> id="<?php echo $this->get_field_id( 'show_post_title' ); ?>" name="<?php echo $this->get_field_name( 'show_post_title' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_post_title' ); ?>"><?php _e( 'Display post title?', 'lptw_recent_posts_domain' ); ?></label></p>
 
         </p>
         <?php
@@ -468,7 +497,10 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		$instance['number'] = (int) $new_instance['number'];
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
-		$instance['locale'] = strip_tags($new_instance['locale']);
+		$instance['date_format'] = strip_tags($new_instance['date_format']);
+		$instance['time_format'] = strip_tags($new_instance['time_format']);
+		$instance['show_time'] = isset( $new_instance['show_time'] ) ? (bool) $new_instance['show_time'] : false;
+		$instance['show_time_before'] = isset( $new_instance['show_time_before'] ) ? (bool) $new_instance['show_time_before'] : false;
 		$this->flush_widget_cache();
 
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
@@ -499,12 +531,6 @@ add_action( 'widgets_init', 'lptw_recent_posts_load_widget' );
 // all-news-small-thumb
 
 function lptw_display_recent_posts ( $atts ) {
-    /* months localization */
-    $months_ru = Array(1 => "Янв", 2 => "Фев", 3 => "Мар", 4 => "Апр", 5 => "Май", 6 => "Июн", 7 => "Июл", 8 => "Авг", 9 => "Сен", 10 => "Окт", 11 => "Ноя", 12 => "Дек");
-    $months_full_ru = Array(1 => "Январь", 2 => "Февраль", 3 => "Март", 4 => "Апрель", 5 => "Май", 6 => "Июнь", 7 => "Июль", 8 => "Август", 9 => "Сентябрь", 10 => "Октябрь", 11 => "Ноябрь", 12 => "Декабрь");
-    $months_en = Array(1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun", 7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec");
-    $months_full_en = Array(1 => "January", 2 => "February", 3 => "March", 4 => "April", 5 => "May", 6 => "June", 7 => "July", 8 => "August", 9 => "September", 10 => "October", 11 => "November", 12 => "December");
-
     $default_posts_per_page =  get_option( 'posts_per_page', '10' );
 
     $a = shortcode_atts( array(
@@ -521,24 +547,11 @@ function lptw_display_recent_posts ( $atts ) {
         'columns'           => '1',
         'height'            => '',
         'width'             => '300',
-        'locale'            => 'en'
+        'date_format'       => 'd.m.Y',
+        'time_format'       => 'H:i',
+        'show_time'         => 'true',
+        'show_time_before'  => 'true'
     ), $atts );
-
-    /* choose months names in case of locale setting */
-    switch($a['locale']) {
-        case 'ru':
-            $months = $months_ru;
-            $months_full = $months_full_ru;
-        break;
-        case 'en':
-            $months = $months_en;
-            $months_full = $months_full_en;
-        break;
-        default:
-            $months = $months_en;
-            $months_full = $months_full_en;
-        break;
-    }
 
     if ($a['width'] != '' || $a['height'] != '') {
         $dim_style = 'style="';
@@ -566,6 +579,16 @@ function lptw_display_recent_posts ( $atts ) {
         $content = '';
         while( $allnews->have_posts() ) {
             $allnews->the_post();
+
+            $post_date = get_the_date($a['date_format']);
+            $post_time = get_the_date($a['time_format']);
+            if ($a['show_time'] == 'true') {
+                if ($a['show_time_before'] == 'true') { $post_date_time = $post_time . ' ' . $post_date; }
+                else { $post_date_time = $post_date . ' ' . $post_time; }
+            }
+            else { $post_date_time = $post_date; }
+
+
             $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($allnews->post_ID), $a['thumbnail_size'] );
             $url = $thumb['0'];
             if (!$url && $a['random_thumbnail'] == 'true') {
@@ -585,48 +608,41 @@ function lptw_display_recent_posts ( $atts ) {
             /* start layouts output */
             /* basic layout - one or tho columns, fixed or adaptive width */
             if ($a['layout'] == 'basic' ) {
-            $post_date = get_the_date();
-            $month_dig = date("n", strtotime($post_date));
-            $month_word = $months_full[$month_dig];
-
-            $content .= '
-            <article class="basic-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
-                <header>
-                    <a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>
-                    <div class="lptw-post-header">';
-        	if ( $a['show_date'] ) {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$month_word.' '.date("d, Y", strtotime($post_date)).'</span>';}
-    		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>
-                    </div>
-                    </a>
-                </header>
-            </article>';
+                $content .= '
+                <article class="basic-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
+                    <header>
+                        <a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>
+                        <div class="lptw-post-header">';
+            	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+        		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>
+                        </div>
+                        </a>
+                    </header>
+                </article>';
 
             /* small thumbnails */
             } elseif ($a['layout'] == 'thumbnail' ) {
-            $post_date = get_the_date();
-            $month_dig = date("n", strtotime($post_date));
-            $month_word = $months_full[$month_dig];
-            $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($allnews->post_ID), array ( 100,100 ) );
-            $url_100 = $thumb_100['0'];
-            $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
-                <a href="'.get_the_permalink().'" class="lptw-thumbnail-link"><img src="'.$url_100.'" width="100" height="100" alt="'.get_the_title().'" /></a>
-                <header class="lptw-post-header">';
-        	if ( $a['show_date'] ) { $content .= '<span class="lptw-post-date">'.$month_word.' '.date("d, Y", strtotime($post_date)).'</span>'; }
-    		    	$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>
-                </header>
-            </article>';
+                $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($allnews->post_ID), array ( 100,100 ) );
+                $url_100 = $thumb_100['0'];
+                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
+                    <a href="'.get_the_permalink().'" class="lptw-thumbnail-link"><img src="'.$url_100.'" width="100" height="100" alt="'.get_the_title().'" /></a>
+                    <header class="lptw-post-header">';
+                if ( $a['show_date'] == 'true') { $content .= '<span class="lptw-post-date">'.$post_date_time.'</span>'; }
+        		$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>
+                    </header>
+                </article>';
 
             /* recent posts without thumbnails, with date as drop cap */
             /* the months are localized */
             } elseif ($a['layout'] == 'dropcap' ) {
-                $post_date = get_the_date();
-                $month_dig = date("n", strtotime($post_date));
-                $month_word = $months[$month_dig];
-            $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
+                $post_date = get_the_date('M.Y');
+                $post_day = get_the_date('d');
+
+                $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
                 <header>
                     <div class="lptw-dropcap-date">
-                        <span class="lptw-dropcap-day">'.date("d", strtotime($post_date)).'</span>
-                        <span class="lptw-dropcap-month">'.$month_word.'.'.date("Y", strtotime($post_date)).'</span>
+                        <span class="lptw-dropcap-day">'.$post_day.'</span>
+                        <span class="lptw-dropcap-month">'.$post_date.'</span>
                     </div>
                     <a class="lptw-dropcap-date-link" href="'.get_the_permalink().'">'.get_the_title().'</a>
                 </header>

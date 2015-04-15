@@ -2,16 +2,34 @@
 WordPress plugin that shows the recent posts in the widget and in other parts of the your posts or theme code.
 License: GPLv2 or later
 
+Advanced Recent Posts plugin shows the recent posts with thumbnails in two areas:
+
+* widget in your sidebar
+* shortcode in any place of your post or theme.
+
+Customization of the plugin is wery simple an flexible:
+
+* Widgets are configured into Dashboard -> Appearance -> Widgets
+* Shortcodes are configured in plugin shortcode builder, you will see it in the admin menu of your WordPress
+
+There are two predefined color schemes (only for basic layout): dark and light, but you can set up your own scheme.
+
+Better to see once than read a hundred times - see the [live demo](http://demo.lp-tricks.com/) on my website :)
+
 # Changelog
 
+## 0.4
+* Added different date and time formats - now date and time format is independent from WP date and time settings
+* The custom months localization was removed
+
 ## 0.3
-* Add shortcode builder in WordPress Backend
+* Added shortcode builder in WordPress Backend
 * Two layouts (basic and overlay) merged into one: layout with adaptive or fixed fixed width and fluid images
-* Add one column and two columns support for all layouts
+* Added one column and two columns support for all layouts
 
 ## 0.2
-* Add one more widget  - widget with small thumbnails
-* Add frontend for shortcode, only 4 styles:
+* Added one more widget  - widget with small thumbnails
+* Added frontend for shortcode, only 4 styles:
   * Basic layout
   * Fluid images with dark/light overlay
   * Small thumbnails

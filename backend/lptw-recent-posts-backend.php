@@ -86,24 +86,49 @@ function lptw_recent_posts_manage_shortcodes () {
                 </td>
             </tr>
             <tr>
-                <th scope="row">Show date:</th>
+                <th scope="row">Show date and time:</th>
                 <td>
-                    <fieldset>
-                        <legend class="screen-reader-text"><span>Show date </span></legend>
-                    	<label for="show_date"><input type="checkbox" checked="checked" value="0" id="show_date" name="show_date">
-                    	Display date in recent posts list</label>
+                    <fieldset id="display_date_time">
+                        <legend class="screen-reader-text"><span>Show date and time </span></legend>
+                        <p>
+                        	<label for="show_date"><input type="checkbox" checked="checked" value="0" id="show_date" name="show_date">
+                        	Display date in recent posts list</label>
+                        </p>
+                        <p>
+                        	<label for="show_time"><input type="checkbox" checked="checked" value="0" id="show_time" name="show_time">
+                        	Display time in recent posts list</label>
+                        </p>
+                        <p>
+                        	<label for="show_time_before"><input type="checkbox" checked="checked" value="0" id="show_time_before" name="show_time_before">
+                        	Display time <strong><u>before date</u></strong> in recent posts list. By default - after date.</label>
+                        </p>
                     	<p class="description">Only for Basic and Thumbnail layouts.</p>
                     </fieldset>
                 </td>
             </tr>
             <tr>
-                <th scope="row"><label for="locale">Locale:</label></th>
+                <th scope="row">Date Format</th>
                 <td>
-                    <select id="locale" name="locale">
-                        <option value="en" selected="selected">English</option>
-                    	<option value="ru">Russian</option>
-                    </select>
-                    <p class="description">You can set locale for output months name. See documentation for adding your own locales.</p>
+                	<fieldset id="date_formats">
+                        <legend class="screen-reader-text"><span>Date Format</span></legend>
+                    	<label title="d.m.Y"><input type="radio" checked="checked" value="d.m.Y" name="sb_date_format"> <span><?php echo date('d.m.Y'); ?></span></label><br>
+                    	<label title="m/d/Y"><input type="radio" value="m/d/Y" name="sb_date_format"> <span><?php echo date('m/d/Y'); ?></span></label><br>
+                    	<label title="d/m/Y"><input type="radio" value="d/m/Y" name="sb_date_format"> <span><?php echo date('d/m/Y'); ?></span></label><br>
+                    	<label title="F j, Y"><input type="radio" value="F j, Y" name="sb_date_format"> <span><?php echo date('F j, Y'); ?></span></label><br>
+                    	<label title="M j, Y"><input type="radio" value="M j, Y" name="sb_date_format"> <span><?php echo date('M j, Y'); ?></span></label><br>
+                	</fieldset>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Time Format</th>
+                <td>
+                	<fieldset id="time_formats">
+                        <legend class="screen-reader-text"><span>Time Format</span></legend>
+                    	<label title="H:i"><input type="radio" checked="checked" value="H:i" name="sb_time_format"> <span><?php echo date('H:i'); ?></span></label><br>
+                    	<label title="H:i:s"><input type="radio" value="H:i:s" name="sb_time_format"> <span><?php echo date('H:i:s'); ?></span></label><br>
+                    	<label title="g:i a"><input type="radio" value="g:i a" name="sb_time_format"> <span><?php echo date('g:i a'); ?></span></label><br>
+                    	<label title="g:i:s a"><input type="radio" value="g:i:s a" name="sb_time_format"> <span><?php echo date('g:i:s a'); ?></span></label><br>
+                	</fieldset>
                 </td>
             </tr>
             <tr>
