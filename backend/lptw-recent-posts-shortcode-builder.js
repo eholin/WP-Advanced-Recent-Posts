@@ -1,5 +1,15 @@
 jQuery(document).ready(function($) {
   'use strict';
+  /* widget scripts */
+
+  $('body').on('click', '.lptw-categories-dropdown-link', function(e) {
+    e.preventDefault();
+    var $parent = $(this).closest('div[id]');
+    $parent.find('#lptw-categories-wrapper').slideToggle('fast');
+    $parent.find('#lptw-categories-action').toggleClass( 'lptw-categories-action-down' );
+    $parent.find('#lptw-categories-action').toggleClass( 'lptw-categories-action-up' );
+  });
+
   /* shortcode builder scripts */
 
   $("#lptw_generate_shortcode").click(function(e) {
@@ -22,8 +32,21 @@ jQuery(document).ready(function($) {
     }
 
     var sb_posts_per_page = $("#posts_per_page").val();
+
+    if ($("#reverse_post_order").is(":checked") == true) {
+      var sb_reverse_post_order = "true";
+    } else {
+      var sb_reverse_post_order = "false";
+    }
+
     var sb_thumbnail_size = $("#thumbnail_size").val();
     var sb_color_scheme = $("#color_scheme").val();
+
+    if ($("#show_date_before_title").is(":checked") == true) {
+      var sb_show_date_before_title = "true";
+    } else {
+      var sb_show_date_before_title = "false";
+    }
 
     if ($("#show_date").is(":checked") == true) {
       var sb_show_date = "true";
@@ -67,6 +90,7 @@ jQuery(document).ready(function($) {
       sb_time_format = '';
       sb_show_time = '';
       sb_show_time_before = '';
+      sb_show_date_before_title = '';
     }
 
     var shortcode = '[lptw_recentposts';
@@ -88,11 +112,17 @@ jQuery(document).ready(function($) {
     if (sb_posts_per_page != '') {
       shortcode += ' posts_per_page="' + sb_posts_per_page + '"';
     }
+    if (sb_reverse_post_order != '') {
+      shortcode += ' reverse_post_order="' + sb_reverse_post_order + '"';
+    }
     if (sb_thumbnail_size != '') {
       shortcode += ' thumbnail_size="' + sb_thumbnail_size + '"';
     }
     if (sb_color_scheme != '') {
       shortcode += ' color_scheme="' + sb_color_scheme + '"';
+    }
+    if (sb_show_date_before_title != '') {
+      shortcode += ' show_date_before_title="' + sb_show_date_before_title + '"';
     }
     if (sb_show_date != '') {
       shortcode += ' show_date="' + sb_show_date + '"';
@@ -132,40 +162,33 @@ jQuery(document).ready(function($) {
   $(".layout-radio").change(function() {
 
     if ($("#layout-basic").is(":checked") == true) {
-      $('#sb_fluid_images').prop('disabled', false);
+      /* disable all inputs with class layout-basic-hide */
+      $('.layout-basic-hide').prop('disabled', true);
+
+      /* enable all inputs with class layout-basic-show */
+      $('.layout-basic-show').prop('disabled', false);
+
       $('#sb_fluid_images').prop('checked', true);
-      $('#sb_width').prop('disabled', true);
-      $('#sb_columns_1').prop('disabled', true);
-      $('#sb_columns_2').prop('disabled', true);
-      $('#thumbnail_size').prop('disabled', false);
-      $('#date_formats').prop('disabled', false);
-      $('#time_formats').prop('disabled', false);
-      $('#display_date_time').prop('disabled', false);
-      $('#color_scheme').prop('disabled', false);
     }
 
     if ($("#layout-thumbnail").is(":checked") == true) {
+      /* disable all inputs with class layout-thumbnail-hide */
+      $('.layout-thumbnail-hide').prop('disabled', true);
+
+      /* enable all inputs with class layout-thumbnail-show */
+      $('.layout-thumbnail-show').prop('disabled', false);
+
       $('#sb_fluid_images').prop('checked', false);
-      $('#sb_fluid_images').prop('disabled', true);
-      $('#sb_width').prop('disabled', false);
-      $('#sb_columns_1').prop('disabled', false);
-      $('#sb_columns_2').prop('disabled', false);
-      $('#color_scheme').prop('disabled', true);
-      $('#thumbnail_size').prop('disabled', true);
-      $('#date_formats').prop('disabled', false);
-      $('#time_formats').prop('disabled', false);
-      $('#display_date_time').prop('disabled', false);
     }
 
     if ($("#layout-dropcap").is(":checked") == true) {
-      $('#display_date_time').prop('disabled', true);
+      /* disable all inputs with class layout-dropcap-hide */
+      $('.layout-dropcap-hide').prop('disabled', true);
+
+      /* enable all inputs with class layout-dropcap-show */
+      $('.layout-dropcap-show').prop('disabled', false);
+
       $('#sb_fluid_images').prop('checked', false);
-      $('#sb_fluid_images').prop('disabled', true);
-      $('#color_scheme').prop('disabled', true);
-      $('#date_formats').prop('disabled', true);
-      $('#time_formats').prop('disabled', true);
-    } else {
-      $('#show_date').prop('disabled', false);
     }
 
   });

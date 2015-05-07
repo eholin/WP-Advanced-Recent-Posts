@@ -2,6 +2,8 @@
 WordPress plugin that shows the recent posts in the widget and in other parts of the your posts or theme code.
 License: GPLv2 or later
 
+Plugin on [wordpress.org](https://wordpress.org/plugins/advanced-recent-posts/)
+
 Advanced Recent Posts plugin shows the recent posts with thumbnails in two areas:
 
 * widget in your sidebar
@@ -17,6 +19,12 @@ There are two predefined color schemes (only for basic layout): dark and light, 
 Better to see once than read a hundred times - see the [live demo](http://demo.lp-tricks.com/) on my website :)
 
 # Changelog
+
+## 0.5
+* Now you can select one or more categories of displayed posts
+* Now you can rearrange the date and title
+* Now you can display posts in reverse order
+* Fixed some bugs
 
 ## 0.4
 * Added different date and time formats - now date and time format is independent from WP date and time settings

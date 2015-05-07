@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy
-Version: 0.4
+Version: 0.5
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -71,6 +71,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$number = ( ! empty( $instance['number'] ) ) ? absint( $instance['number'] ) : 5;
 		if ( ! $number ) {$number = 5;}
 
+		$reverse_post_order = isset( $instance['reverse_post_order'] ) ? $instance['reverse_post_order'] : false;
+
 		$show_date = isset( $instance['show_date'] ) ? $instance['show_date'] : true;
 
 		$date_format = isset( $instance['date_format'] ) ? $instance['date_format'] : 'm/d/Y';
@@ -83,24 +85,30 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		$show_post_title = isset( $instance['show_post_title'] ) ? $instance['show_post_title'] : true;
 
+		$show_title_before = isset( $instance['show_title_before'] ) ? $instance['show_title_before'] : true;
+
 		$color_scheme = isset( $instance['color_scheme'] ) ? $instance['color_scheme'] : 'light';
+
+		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
 
         /* don't show post in recent if it shows in page */
         global $post;
         if (!empty($post) && $exclude_current_post == true) { $exclude_post = array( $post->ID ); }
 
-        /* @TODO */
-        /* exclude some post IDs, defined in admin area */
-
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
-			'posts_per_page'      => $number,
-			'no_found_rows'       => true,
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => true,
-            'post__not_in'        => $exclude_post
+			'posts_per_page'        => $number,
+			'no_found_rows'         => true,
+			'post_status'           => 'publish',
+			'ignore_sticky_posts'   => true,
+            'post__not_in'          => $exclude_post,
+            'category__in'          => $post_category,
+            'order'                 => 'DESC',
+            'orderby'               => 'date'
 		) ) );
 
 		if ($r->have_posts()) :
+            if ($reverse_post_order == 'true') { $r->posts = array_reverse($r->posts); }
+
 ?>
 		<?php echo $args['before_widget']; ?>
 		<?php if ( $title && $show_widget_title == true) {
@@ -127,12 +135,21 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 				<div class="lptw-post-thumbnail">
                     <a href="<?php the_permalink(); ?>" class="lptw-post-thumbnail-link"><div class="overlay overlay-<?php echo $color_scheme; ?>"><img src="<?php echo $url; ?>" alt="<?php get_the_title() ? the_title() : the_ID(); ?>" /></div>
                     <div class="lptw-post-header">
-        		    	<?php if ( $show_date == true ) : ?>
-    	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $post_date_time; ?></span>
-        			    <?php endif; ?>
-        		    	<?php if ( $show_post_title ) : ?>
-    		    		<span class="lptw-post-title title-<?php echo $color_scheme; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
-        			    <?php endif; ?>
+        		    	<?php if ( $show_title_before == true ) : ?>
+            		    	<?php if ( $show_post_title ) : ?>
+        		    		<span class="lptw-post-title title-<?php echo $color_scheme; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
+            			    <?php endif; ?>
+            		    	<?php if ( $show_date == true ) : ?>
+        	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $post_date_time; ?></span>
+            			    <?php endif; ?>
+                        <?php else : ?>
+            		    	<?php if ( $show_date == true ) : ?>
+        	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $post_date_time; ?></span>
+            			    <?php endif; ?>
+            		    	<?php if ( $show_post_title ) : ?>
+        		    		<span class="lptw-post-title title-<?php echo $color_scheme; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
+            			    <?php endif; ?>
+            			<?php endif; ?>
                     </div>
                     </a>
                 </div>
@@ -174,8 +191,14 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         if ( isset( $instance[ 'number' ] ) ) { $number = absint( $instance[ 'number' ] ); }
         else { $number = 5; }
 
+        if ( isset( $instance[ 'reverse_post_order' ] ) ) { $reverse_post_order = (bool) $instance[ 'reverse_post_order' ]; }
+        else { $reverse_post_order = false; }
+
         if ( isset( $instance[ 'show_post_title' ] ) ) { $show_post_title = (bool) $instance[ 'show_post_title' ]; }
         else { $show_post_title = true; }
+
+        if ( isset( $instance[ 'show_title_before' ] ) ) { $show_title_before = (bool) $instance[ 'show_title_before' ]; }
+        else { $show_title_before = false; }
 
         if ( isset( $instance[ 'show_date' ] ) ) { $show_date = (bool) $instance[ 'show_date' ]; }
         else { $show_date = false; }
@@ -195,6 +218,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         if ( isset( $instance[ 'color_scheme' ] ) ) { $color_scheme = $instance[ 'color_scheme' ] ; }
         else { $color_scheme = 'light'; }
 
+        if ( isset( $instance[ 'post_category' ] ) ) { $post_category = $instance[ 'post_category' ]; }
 
         // Widget admin form
         ?>
@@ -205,11 +229,24 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_widget_title ); ?> id="<?php echo $this->get_field_id( 'show_widget_title' ); ?>" name="<?php echo $this->get_field_name( 'show_widget_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_widget_title' ); ?>"><?php _e( 'Display widget title?', 'lptw_recent_posts_domain' ); ?></label></p>
 
+        <div class="lptw-categories-dropdown"><a class="lptw-categories-dropdown-link" href="#">List of categories <span id="lptw-categories-action" class="lptw-categories-action-down"></span></a></div>
+        <div id="lptw-categories-wrapper">
+            <fieldset id="categories_list">
+                <ul class="lptw-categories-list">
+                    <?php wp_category_checklist(0, 0, $post_category); ?>
+                </ul>
+            </fieldset>
+            <p class="description">If none of the categories is selected - will be displayed posts from all categories.</p>
+        </div>
+
 		<p><input class="checkbox" type="checkbox" <?php checked( $exclude_current_post ); ?> id="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>" name="<?php echo $this->get_field_name( 'exclude_current_post' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>"><?php _e( 'Exclude current post from list?', 'lptw_recent_posts_domain' ); ?></label></p>
 
 		<p><label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php _e( 'Number of posts to show:', 'lptw_recent_posts_domain' ); ?></label>
 		<input id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="text" value="<?php echo $number; ?>" size="3" /></p>
+
+		<p><input class="checkbox" type="checkbox" <?php checked( $reverse_post_order ); ?> id="<?php echo $this->get_field_id( 'reverse_post_order' ); ?>" name="<?php echo $this->get_field_name( 'reverse_post_order' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'reverse_post_order' ); ?>"><?php _e( 'Reverse post order: display the latest post last in the list?', 'lptw_recent_posts_domain' ); ?></label></p>
 
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>" name="<?php echo $this->get_field_name( 'show_date' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php _e( 'Display post date?', 'lptw_recent_posts_domain' ); ?></label></p>
@@ -241,6 +278,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_post_title ); ?> id="<?php echo $this->get_field_id( 'show_post_title' ); ?>" name="<?php echo $this->get_field_name( 'show_post_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_post_title' ); ?>"><?php _e( 'Display post title?', 'lptw_recent_posts_domain' ); ?></label></p>
 
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_title_before ); ?> id="<?php echo $this->get_field_id( 'show_title_before' ); ?>" name="<?php echo $this->get_field_name( 'show_title_before' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_title_before' ); ?>"><?php _e( 'Display post title before post date and time?', 'lptw_recent_posts_domain' ); ?></label></p>
+
 		<p>
 			<label for="<?php echo $this->get_field_id('color_scheme'); ?>"><?php _e( 'Color scheme:', 'lptw_recent_posts_domain' ); ?></label>
 			<select name="<?php echo $this->get_field_name( 'color_scheme' ); ?>" id="<?php echo $this->get_field_id('color_scheme'); ?>" class="widefat">
@@ -258,14 +298,28 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['show_widget_title'] = isset( $new_instance['show_widget_title'] ) ? (bool) $new_instance['show_widget_title'] : false;
 		$instance['exclude_current_post'] = isset( $new_instance['exclude_current_post'] ) ? (bool) $new_instance['exclude_current_post'] : false;
+		$instance['reverse_post_order'] = isset( $new_instance['reverse_post_order'] ) ? (bool) $new_instance['reverse_post_order'] : false;
 		$instance['number'] = (int) $new_instance['number'];
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
+		$instance['show_title_before'] = isset( $new_instance['show_title_before'] ) ? (bool) $new_instance['show_title_before'] : false;
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
 		$instance['date_format'] = strip_tags($new_instance['date_format']);
 		$instance['time_format'] = strip_tags($new_instance['time_format']);
 		$instance['show_time'] = isset( $new_instance['show_time'] ) ? (bool) $new_instance['show_time'] : false;
 		$instance['show_time_before'] = isset( $new_instance['show_time_before'] ) ? (bool) $new_instance['show_time_before'] : false;
 		$instance['color_scheme'] = strip_tags($new_instance['color_scheme']);
+
+		if( isset( $_POST['post_category'] ) ) {
+		    $posted_terms = $_POST['post_category'];
+			// Once we actually have the $_POSTed terms, validate and and save them
+			foreach ( $posted_terms as $term ) {
+			    if( term_exists( absint( $term ), $taxonomy ) ) {
+				    $terms[] = absint( $term );
+				}
+			}
+            $instance['post_category'] = $terms;
+		} else { $instance['post_category'] = ''; }
+
 		$this->flush_widget_cache();
 
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
@@ -333,6 +387,9 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		$number = ( ! empty( $instance['number'] ) ) ? absint( $instance['number'] ) : 5;
 		if ( ! $number ) {$number = 5;}
 
+        if ( isset( $instance[ 'reverse_post_order' ] ) ) { $reverse_post_order = (bool) $instance[ 'reverse_post_order' ]; }
+        else { $reverse_post_order = false; }
+
 		$show_date = isset( $instance['show_date'] ) ? $instance['show_date'] : true;
 
 		$date_format = isset( $instance['date_format'] ) ? $instance['date_format'] : 'm/d/Y';
@@ -345,22 +402,27 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		$show_post_title = isset( $instance['show_post_title'] ) ? $instance['show_post_title'] : true;
 
+		$show_title_before = isset( $instance['show_title_before'] ) ? $instance['show_title_before'] : false;
+
+		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
+
         /* don't show post in recent if it shows in page */
         global $post;
         if (!empty($post) && $exclude_current_post == true) { $exclude_post = array( $post->ID ); }
 
-        /* @TODO */
-        /* exclude some post IDs, defined in admin area */
-
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
-			'posts_per_page'      => $number,
-			'no_found_rows'       => true,
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => true,
-            'post__not_in'        => $exclude_post
+			'posts_per_page'        => $number,
+			'no_found_rows'         => true,
+			'post_status'           => 'publish',
+			'ignore_sticky_posts'   => true,
+            'post__not_in'          => $exclude_post,
+            'category__in'          => $post_category,
+            'order'                 => 'DESC',
+            'orderby'               => 'date'
 		) ) );
 
 		if ($r->have_posts()) :
+            if ($reverse_post_order == 'true') { $r->posts = array_reverse($r->posts); }
 ?>
 		<?php echo $args['before_widget']; ?>
 		<?php if ( $title && $show_widget_title == true) {
@@ -382,12 +444,21 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
                 <div class="lptw-post-small-thumbnail">
                     <a href="<?php the_permalink(); ?>" class="lptw-thumbnail-link"><?php if ( has_post_thumbnail() ) {the_post_thumbnail( array(100, 100) );} ?></a>
                     <div class="lptw-post-header">
-        		    	<?php if ( $show_date == true ) : ?>
-        	    		<span class="lptw-post-date"><?php echo $post_date_time; ?></span>
-        			    <?php endif; ?>
-        		    	<?php if ( $show_post_title ) : ?>
-        		    	<a href="<?php the_permalink(); ?>" class="lptw-header-link"><?php get_the_title() ? the_title() : the_ID(); ?></a>
-        			    <?php endif; ?>
+                        <?php if ( $show_title_before == true ) : ?>
+            		    	<?php if ( $show_post_title ) : ?>
+            		    	<a href="<?php the_permalink(); ?>" class="lptw-header-link"><?php get_the_title() ? the_title() : the_ID(); ?></a>
+            			    <?php endif; ?>
+            		    	<?php if ( $show_date == true ) : ?>
+            	    		<span class="lptw-post-date"><?php echo $post_date_time; ?></span>
+            			    <?php endif; ?>
+                        <?php else : ?>
+            		    	<?php if ( $show_date == true ) : ?>
+            	    		<span class="lptw-post-date"><?php echo $post_date_time; ?></span>
+            			    <?php endif; ?>
+            		    	<?php if ( $show_post_title ) : ?>
+            		    	<a href="<?php the_permalink(); ?>" class="lptw-header-link"><?php get_the_title() ? the_title() : the_ID(); ?></a>
+            			    <?php endif; ?>
+            			<?php endif; ?>
                     </div>
                 </div>
 			</li>
@@ -422,8 +493,14 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
         if ( isset( $instance[ 'number' ] ) ) { $number = absint( $instance[ 'number' ] ); }
         else { $number = 5; }
 
+        if ( isset( $instance[ 'reverse_post_order' ] ) ) { $reverse_post_order = (bool) $instance[ 'reverse_post_order' ]; }
+        else { $reverse_post_order = false; }
+
         if ( isset( $instance[ 'show_post_title' ] ) ) { $show_post_title = (bool) $instance[ 'show_post_title' ]; }
         else { $show_post_title = true; }
+
+        if ( isset( $instance[ 'show_title_before' ] ) ) { $show_title_before = (bool) $instance[ 'show_title_before' ]; }
+        else { $show_title_before = false; }
 
         if ( isset( $instance[ 'show_date' ] ) ) { $show_date = (bool) $instance[ 'show_date' ]; }
         else { $show_date = false; }
@@ -440,6 +517,8 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
         if ( isset( $instance[ 'show_time_before' ] ) ) { $show_time_before = (bool) $instance[ 'show_time_before' ]; }
         else { $show_time_before = false; }
 
+        if ( isset( $instance[ 'post_category' ] ) ) { $post_category = $instance[ 'post_category' ]; }
+
         // Widget admin form
         ?>
         <p>
@@ -449,11 +528,24 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_widget_title ); ?> id="<?php echo $this->get_field_id( 'show_widget_title' ); ?>" name="<?php echo $this->get_field_name( 'show_widget_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_widget_title' ); ?>"><?php _e( 'Display widget title?', 'lptw_recent_posts_domain' ); ?></label></p>
 
+        <div class="lptw-categories-dropdown"><a class="lptw-categories-dropdown-link" href="#">List of categories <span id="lptw-categories-action" class="lptw-categories-action-down"></span></a></div>
+        <div id="lptw-categories-wrapper">
+            <fieldset id="categories_list">
+                <ul class="lptw-categories-list">
+                    <?php wp_category_checklist(0, 0, $post_category); ?>
+                </ul>
+            </fieldset>
+            <p class="description">If none of the categories is selected - will be displayed posts from all categories.</p>
+        </div>
+
 		<p><input class="checkbox" type="checkbox" <?php checked( $exclude_current_post ); ?> id="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>" name="<?php echo $this->get_field_name( 'exclude_current_post' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>"><?php _e( 'Exclude current post from list?', 'lptw_recent_posts_domain' ); ?></label></p>
 
 		<p><label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php _e( 'Number of posts to show:', 'lptw_recent_posts_domain' ); ?></label>
 		<input id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="text" value="<?php echo $number; ?>" size="3" /></p>
+
+		<p><input class="checkbox" type="checkbox" <?php checked( $reverse_post_order ); ?> id="<?php echo $this->get_field_id( 'reverse_post_order' ); ?>" name="<?php echo $this->get_field_name( 'reverse_post_order' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'reverse_post_order' ); ?>"><?php _e( 'Reverse post order: display the latest post last in the list?', 'lptw_recent_posts_domain' ); ?></label></p>
 
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_date ); ?> id="<?php echo $this->get_field_id( 'show_date' ); ?>" name="<?php echo $this->get_field_name( 'show_date' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_date' ); ?>"><?php _e( 'Display post date?', 'lptw_recent_posts_domain' ); ?></label></p>
@@ -485,6 +577,9 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_post_title ); ?> id="<?php echo $this->get_field_id( 'show_post_title' ); ?>" name="<?php echo $this->get_field_name( 'show_post_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_post_title' ); ?>"><?php _e( 'Display post title?', 'lptw_recent_posts_domain' ); ?></label></p>
 
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_title_before ); ?> id="<?php echo $this->get_field_id( 'show_title_before' ); ?>" name="<?php echo $this->get_field_name( 'show_title_before' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_title_before' ); ?>"><?php _e( 'Display post title before post date and time??', 'lptw_recent_posts_domain' ); ?></label></p>
+
         </p>
         <?php
     }
@@ -495,12 +590,26 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		$instance['show_widget_title'] = isset( $new_instance['show_widget_title'] ) ? (bool) $new_instance['show_widget_title'] : false;
 		$instance['exclude_current_post'] = isset( $new_instance['exclude_current_post'] ) ? (bool) $new_instance['exclude_current_post'] : false;
 		$instance['number'] = (int) $new_instance['number'];
+		$instance['reverse_post_order'] = isset( $new_instance['reverse_post_order'] ) ? (bool) $new_instance['reverse_post_order'] : false;
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
+		$instance['show_title_before'] = isset( $new_instance['show_title_before'] ) ? (bool) $new_instance['show_title_before'] : false;
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
 		$instance['date_format'] = strip_tags($new_instance['date_format']);
 		$instance['time_format'] = strip_tags($new_instance['time_format']);
 		$instance['show_time'] = isset( $new_instance['show_time'] ) ? (bool) $new_instance['show_time'] : false;
 		$instance['show_time_before'] = isset( $new_instance['show_time_before'] ) ? (bool) $new_instance['show_time_before'] : false;
+
+		if( isset( $_POST['post_category'] ) ) {
+		    $posted_terms = $_POST['post_category'];
+			// Once we actually have the $_POSTed terms, validate and and save them
+			foreach ( $posted_terms as $term ) {
+			    if( term_exists( absint( $term ), $taxonomy ) ) {
+				    $terms[] = absint( $term );
+				}
+			}
+            $instance['post_category'] = $terms;
+		} else { $instance['post_category'] = ''; }
+
 		$this->flush_widget_cache();
 
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
@@ -534,23 +643,25 @@ function lptw_display_recent_posts ( $atts ) {
     $default_posts_per_page =  get_option( 'posts_per_page', '10' );
 
     $a = shortcode_atts( array(
-        'post_type'         => 'post',
-        'category_id'       => '',
-        'post_parent'       => '0',
-        'posts_per_page'    => $default_posts_per_page,
-        'thumbnail_size'    => 'thumbnail',
-        'random_thumbnail'  => 'false',
-        'layout'            => 'overlay',
-        'color_scheme'      => 'light',
-        'show_date'         => 'true',
-        'fluid_images'      => 'false',
-        'columns'           => '1',
-        'height'            => '',
-        'width'             => '300',
-        'date_format'       => 'd.m.Y',
-        'time_format'       => 'H:i',
-        'show_time'         => 'true',
-        'show_time_before'  => 'true'
+        'post_type'                 => 'post',
+        'category_id'               => '',
+        'post_parent'               => '0',
+        'posts_per_page'            => $default_posts_per_page,
+        'thumbnail_size'            => 'thumbnail',
+        'random_thumbnail'          => 'false',
+        'layout'                    => 'overlay',
+        'color_scheme'              => 'light',
+        'show_date'                 => 'true',
+        'fluid_images'              => 'false',
+        'columns'                   => '1',
+        'height'                    => '',
+        'width'                     => '300',
+        'date_format'               => 'd.m.Y',
+        'time_format'               => 'H:i',
+        'show_time'                 => 'true',
+        'show_time_before'          => 'true',
+        'show_date_before_title'    => 'true',
+        'reverse_post_order'        => 'false'
     ), $atts );
 
     if ($a['width'] != '' || $a['height'] != '') {
@@ -570,11 +681,14 @@ function lptw_display_recent_posts ( $atts ) {
         'post_type'       => $a['post_type'],
         'cat'             => $a['category_id'],
         'post_parent'     => $a['post_parent'],
-        'posts_per_page'  => $a['posts_per_page']
+        'posts_per_page'  => $a['posts_per_page'],
+        'order'           => 'DESC',
+        'orderby'         => 'date'
         );
 
     $allnews = new WP_Query( $args );
     if( $allnews->have_posts() ) {
+        if ($a['reverse_post_order'] == 'true') { $allnews->posts = array_reverse($allnews->posts); }
         $i=0;
         $content = '';
         while( $allnews->have_posts() ) {
@@ -613,9 +727,14 @@ function lptw_display_recent_posts ( $atts ) {
                     <header>
                         <a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>
                         <div class="lptw-post-header">';
-            	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
-        		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>
-                        </div>
+                if ( $a['show_date_before_title'] == 'true' ) {
+                	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+            		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
+                } else {
+            		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
+                	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+                }
+                $content .= '</div>
                         </a>
                     </header>
                 </article>';
@@ -627,9 +746,14 @@ function lptw_display_recent_posts ( $atts ) {
                 $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
                     <a href="'.get_the_permalink().'" class="lptw-thumbnail-link"><img src="'.$url_100.'" width="100" height="100" alt="'.get_the_title().'" /></a>
                     <header class="lptw-post-header">';
-                if ( $a['show_date'] == 'true') { $content .= '<span class="lptw-post-date">'.$post_date_time.'</span>'; }
-        		$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>
-                    </header>
+                if ( $a['show_date_before_title'] == 'true' ) {
+                    if ( $a['show_date'] == 'true') { $content .= '<span class="lptw-post-date">'.$post_date_time.'</span>'; }
+            		$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>';
+                } else {
+            		$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>';
+                    if ( $a['show_date'] == 'true') { $content .= '<span class="lptw-post-date">'.$post_date_time.'</span>'; }
+                }
+                $content .= '</header>
                 </article>';
 
             /* recent posts without thumbnails, with date as drop cap */
