@@ -93,6 +93,15 @@ jQuery(document).ready(function($) {
       sb_show_date_before_title = '';
     }
 
+    /* responsive grid layout */
+    if (sb_layout == 'grid-medium') {
+      sb_fluid_images = '';
+      sb_thumbnail_size = '';
+      sb_width = '';
+      sb_columns = '';
+    }
+
+
     var shortcode = '[lptw_recentposts';
     if (sb_layout != '') {
       shortcode += ' layout="' + sb_layout + '"';
@@ -187,6 +196,16 @@ jQuery(document).ready(function($) {
 
       /* enable all inputs with class layout-dropcap-show */
       $('.layout-dropcap-show').prop('disabled', false);
+
+      $('#sb_fluid_images').prop('checked', false);
+    }
+
+    if ($("#layout-grid-medium").is(":checked") == true) {
+      /* disable all inputs with class layout-basic-hide */
+      $('.layout-grid-hide').prop('disabled', true);
+
+      /* enable all inputs with class layout-basic-show */
+      $('.layout-grid-show').prop('disabled', false);
 
       $('#sb_fluid_images').prop('checked', false);
     }

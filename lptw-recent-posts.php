@@ -3,8 +3,8 @@
 Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
-Tags: widget, posts, plugin, recent, recent posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy
-Version: 0.5
+Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy
+Version: 0.6
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -15,9 +15,106 @@ Text Domain: lptw_recent_posts_domain
 function lptw_recent_posts_register_scripts() {
 	wp_register_style( 'lptw-style', plugins_url( 'lptw-recent-posts.css', __FILE__ ) );
 	wp_enqueue_style( 'lptw-style' );
+
+	wp_enqueue_script( 'jquery-masonry' );
+
+    wp_enqueue_script( 'lptw-recent-posts-script', plugins_url( 'lptw-recent-posts.js', __FILE__ ), array(), '0.5', true );
 }
 
 add_action( 'wp_enqueue_scripts', 'lptw_recent_posts_register_scripts' );
+
+/* register custom image size for Grid Layout */
+function lptw_recent_posts_activate () {
+    add_image_size( 'lptw-grid-large', 610, 400, true );
+}
+
+/* trim excerpt to custom size */
+function custom_excerpt ($limit) {
+      $excerpt = explode(' ', get_the_excerpt(), $limit);
+      if (count($excerpt)>=$limit) {
+        array_pop($excerpt);
+        $excerpt = implode(" ",$excerpt).'...';
+      } else {
+        $excerpt = implode(" ",$excerpt);
+      }
+      $excerpt = preg_replace('`\[[^\]]*\]`','',$excerpt);
+      return $excerpt;
+    }
+
+register_activation_hook( __FILE__, 'lptw_recent_posts_activate' );
+
+/* add price table editor metabox */
+add_action( 'add_meta_boxes', 'lptw_recent_posts_options' );
+function lptw_recent_posts_options () {
+    add_meta_box(
+        'lptw_recent_posts_options',
+        __( 'Advanced Recent Posts Options', 'lptw_recent_posts_domain' ),
+        'lptw_recent_posts_options_box_content',
+        'post',
+        'normal',
+        'default'
+    );
+}
+
+function lptw_recent_posts_options_box_content ( $post ) {
+
+    // Add a nonce field so we can check for it later.
+	wp_nonce_field( 'lptw_recent_posts_options_box', 'lptw_recent_posts_meta_box_nonce' );
+
+    $value = get_post_meta( $post->ID, 'featured_post', true );
+
+    if ($value == 'on') {$checked = 'checked="checked"';}
+    else {$checked = '';}
+    echo '<p><label class="lptw-checkbox-label" for="featured_post"><input class="checkbox" type="checkbox" '.$checked.' id="featured_post" name="featured_post" />&nbsp;'.__( 'Featured post', 'lptw_recent_posts_domain' ).'</label></p>';
+    echo '<p class="description">'.__( 'Featured post displays larger than the other posts in Grid Layout', 'lptw_recent_posts_domain' ).'</p>';
+}
+
+function lptw_recent_posts_options_save_meta_box_data( $post_id ) {
+
+	/*
+	 * We need to verify this came from our screen and with proper authorization,
+	 * because the save_post action can be triggered at other times.
+	 */
+
+	// Check if our nonce is set.
+	if ( ! isset( $_POST['lptw_recent_posts_meta_box_nonce'] ) ) {
+		return;
+	}
+
+	// Verify that the nonce is valid.
+	if ( ! wp_verify_nonce( $_POST['lptw_recent_posts_meta_box_nonce'], 'lptw_recent_posts_options_box' ) ) {
+		return;
+	}
+
+	// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	// Check the user's permissions.
+	if ( isset( $_POST['post_type'] ) && 'post' == $_POST['post_type'] ) {
+
+		if ( ! current_user_can( 'edit_page', $post_id ) ) {
+			return;
+		}
+
+	} else {
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+	}
+
+	/* OK, it's safe for us to save the data now. */
+
+	// Sanitize user input.
+	$my_data = sanitize_text_field( $_POST['featured_post'] );
+
+	// Update the meta field in the database.
+	update_post_meta( $post_id, 'featured_post', $my_data );
+}
+add_action( 'save_post', 'lptw_recent_posts_options_save_meta_box_data' );
+
 
 /**
 -------------------------------------- Fluid Images Widget --------------------------------------
@@ -647,9 +744,10 @@ function lptw_display_recent_posts ( $atts ) {
         'category_id'               => '',
         'post_parent'               => '0',
         'posts_per_page'            => $default_posts_per_page,
+        'exclude_posts'             => '',
         'thumbnail_size'            => 'thumbnail',
         'random_thumbnail'          => 'false',
-        'layout'                    => 'overlay',
+        'layout'                    => 'basic',
         'color_scheme'              => 'light',
         'show_date'                 => 'true',
         'fluid_images'              => 'false',
@@ -677,10 +775,16 @@ function lptw_display_recent_posts ( $atts ) {
     elseif ($a['columns'] > 2) {$a['columns'] = 2;}
     $column_style = 'columns-'.$a['columns'];
 
+    if (!empty($a['exclude_posts'])) {
+        $exclude_post = explode(',', $a['exclude_posts']);
+        }
+    else { $exclude_post = ''; }
+
     $args = array(
         'post_type'       => $a['post_type'],
         'cat'             => $a['category_id'],
         'post_parent'     => $a['post_parent'],
+        'post__not_in'    => $exclude_post,
         'posts_per_page'  => $a['posts_per_page'],
         'order'           => 'DESC',
         'orderby'         => 'date'
@@ -691,8 +795,11 @@ function lptw_display_recent_posts ( $atts ) {
         if ($a['reverse_post_order'] == 'true') { $allnews->posts = array_reverse($allnews->posts); }
         $i=0;
         $content = '';
+        if ($a['layout'] == 'grid-medium') {$content .= '<div id="grid-container">';}
         while( $allnews->have_posts() ) {
             $allnews->the_post();
+
+            $post_id = get_the_ID();
 
             $post_date = get_the_date($a['date_format']);
             $post_time = get_the_date($a['time_format']);
@@ -703,7 +810,7 @@ function lptw_display_recent_posts ( $atts ) {
             else { $post_date_time = $post_date; }
 
 
-            $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($allnews->post_ID), $a['thumbnail_size'] );
+            $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), $a['thumbnail_size'] );
             $url = $thumb['0'];
             if (!$url && $a['random_thumbnail'] == 'true') {
                 $thumb_posts = get_posts(array('orderby' => 'rand', 'category' => $a['category_id'], 'numberposts' => 1, 'meta_key' => '_thumbnail_id'));
@@ -741,7 +848,7 @@ function lptw_display_recent_posts ( $atts ) {
 
             /* small thumbnails */
             } elseif ($a['layout'] == 'thumbnail' ) {
-                $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($allnews->post_ID), array ( 100,100 ) );
+                $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), array ( 100,100 ) );
                 $url_100 = $thumb_100['0'];
                 $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
                     <a href="'.get_the_permalink().'" class="lptw-thumbnail-link"><img src="'.$url_100.'" width="100" height="100" alt="'.get_the_title().'" /></a>
@@ -757,7 +864,6 @@ function lptw_display_recent_posts ( $atts ) {
                 </article>';
 
             /* recent posts without thumbnails, with date as drop cap */
-            /* the months are localized */
             } elseif ($a['layout'] == 'dropcap' ) {
                 $post_date = get_the_date('M.Y');
                 $post_day = get_the_date('d');
@@ -771,9 +877,67 @@ function lptw_display_recent_posts ( $atts ) {
                     <a class="lptw-dropcap-date-link" href="'.get_the_permalink().'">'.get_the_title().'</a>
                 </header>
             </article>';
+
+            /* recent posts with thumbnail and featured posts */
+            } elseif ($a['layout'] == 'grid-medium' ) {
+                $featured = get_post_meta ($post_id, 'featured_post', true);
+                if ($featured == 'on') {
+                    $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'lptw-grid-large' );
+                    $url_grid = $thumb_grid['0'];
+
+                    $content .= '
+                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element w3">
+                        <header>
+                            <a href="'.get_the_permalink().'" class="lptw-post-grid-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url_grid.'" alt="'.get_the_title().'" /></div>
+                            <div class="lptw-post-header">';
+                    if ( $a['show_date_before_title'] == 'true' ) {
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
+                    } else {
+                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+                    }
+                    $content .= '</div>
+                            </a>
+                        </header>';
+                    $my_excerpt = get_the_excerpt();
+                    if ( $my_excerpt != '' ) {
+                        $content .= '<content class="post-excerpt"><span>' . $my_excerpt . '</span></content>';
+                    }
+                    $content .= '</article>';
+                }
+                else {
+                    $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'medium' );
+                    $url_grid = $thumb_grid['0'];
+
+                    $content .= '
+                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element grid-element-'.$a['color_scheme'].'">
+                        <header>
+                            <a href="'.get_the_permalink().'" class="lptw-post-grid-img"><img src="'.$url_grid.'" alt="'.get_the_title().'" /></a>
+                            <div class="lptw-post-header">';
+                    if ( $a['show_date_before_title'] == 'true' ) {
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+                		$content .= '<a class="lptw-post-title title-'.$a['color_scheme'].'" href="'.get_the_permalink().'">'.get_the_title().'</a>';
+                    } else {
+                		$content .= '<a class="lptw-post-title title-'.$a['color_scheme'].'" href="'.get_the_permalink().'">'.get_the_title().'</a>';
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+                    }
+                    $content .= '</div>
+                        </header>';
+                    if ( has_excerpt( $post_id ) ) {
+                        $my_excerpt = get_the_excerpt();
+                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'">' . $my_excerpt . '</content>';
+                    } else {
+                        $my_excerpt = custom_excerpt(35);
+                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'">' . $my_excerpt . '</content>';
+                    }
+                    $content .= '</article>';
+                }
             }
+
             $i++;
         } // end while( $allnews->have_posts() )
+        if ($a['layout'] == 'grid-medium') {$content .= '</div>';}
         return $content;
     } else {
         return __( 'No recent posts', 'lptw_recent_posts_domain' );

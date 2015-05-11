@@ -24,6 +24,10 @@ function lptw_recent_posts_manage_shortcodes () {
                                 <label for="layout-dropcap"><input type="radio" class="layout-radio" name="sb_layout" id="layout-dropcap" value="dropcap" />&nbsp;Drop Cap</label>&nbsp;&nbsp;
                                 <a class="demo-link" href="http://demo.lp-tricks.com/recent-posts/drop-cap-layout/" target="_blank"><span class="dashicons dashicons-admin-links"></span>&nbsp;<span class="demo">View demo (external link)</span></a>
                             </li>
+                            <li>
+                                <label for="layout-grid-medium"><input type="radio" class="layout-radio" name="sb_layout" id="layout-grid-medium" value="grid-medium" />&nbsp;Responsive Grid</label>&nbsp;&nbsp;
+                                <a class="demo-link" href="http://demo.lp-tricks.com/recent-posts/responsive-grid-dark/" target="_blank"><span class="dashicons dashicons-admin-links"></span>&nbsp;<span class="demo">View demo (external link)</span></a>
+                            </li>
                         </ul>
                     </fieldset>
                 </td>
@@ -33,15 +37,15 @@ function lptw_recent_posts_manage_shortcodes () {
                 <td>
                     <div class="lptw-sb-row">
                         <legend class="screen-reader-text"><span>Adaptive layout </span></legend>
-                        <label for="sb_fluid_images"><input type="checkbox" class="layout-basic-show layout-thumbnail-hide layout-dropcap-hide" checked="checked" value="0" id="sb_fluid_images" name="sb_fluid_images">
+                        <label for="sb_fluid_images"><input type="checkbox" class="layout-basic-show layout-grid-hide layout-thumbnail-hide layout-dropcap-hide" checked="checked" value="0" id="sb_fluid_images" name="sb_fluid_images">
                         The width of the image adapts to the width of the container.</label>
                     </div>
                     <div class="lptw-sb-row">
-                        <label for="sb_width"><input type="number" class="small-text layout-basic-hide layout-thumbnail-show layout-dropcap-show" value="300" id="sb_width" min="1" step="1" name="sb_width" disabled="disabled">
+                        <label for="sb_width"><input type="number" class="small-text layout-basic-hide layout-grid-hide layout-grid-hide layout-thumbnail-show layout-dropcap-show" value="300" id="sb_width" min="1" step="1" name="sb_width" disabled="disabled">
                         The width of the column in pixels, if not already selected adaptive layout.</label>
                     </div>
                     <div class="lptw-sb-row">
-                        <fieldset id="columns_count" class="layout-basic-show layout-thumbnail-show">
+                        <fieldset id="columns_count" class="layout-basic-show layout-grid-hide layout-thumbnail-show">
                             <label for="sb_columns_1"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_1" value="1" checked="checked" disabled="disabled" />&nbsp;1 column</label>
                             <label for="sb_columns_2"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_2" value="2" disabled="disabled" />&nbsp;2 columns</label>
                         </fieldset>
@@ -73,7 +77,7 @@ function lptw_recent_posts_manage_shortcodes () {
             <tr>
                 <th scope="row"><label for="thumbnail_size">Image size:</label></th>
                 <td>
-                    <select class="layout-basic-show layout-thumbnail-hide" id="thumbnail_size" name="thumbnail_size">
+                    <select class="layout-basic-show layout-grid-hide layout-thumbnail-hide" id="thumbnail_size" name="thumbnail_size">
                         <option value="thumbnail">Thumbnail</option>
                     	<option value="medium" selected="selected">Medium</option>
                     	<option value="large">Large</option>
@@ -84,7 +88,7 @@ function lptw_recent_posts_manage_shortcodes () {
             <tr>
                 <th scope="row"><label for="color_scheme">Color scheme:</label></th>
                 <td>
-                    <select class="layout-basic-show layout-thumbnail-hide layout-dropcap-hide" id="color_scheme" name="color_scheme">
+                    <select class="layout-basic-show layout-grid-show layout-thumbnail-hide layout-dropcap-hide" id="color_scheme" name="color_scheme">
                         <option value="light">Light</option>
                     	<option value="dark" selected="selected">Dark</option>
                     </select>
@@ -94,7 +98,7 @@ function lptw_recent_posts_manage_shortcodes () {
             <tr>
                 <th scope="row">Show date and time:</th>
                 <td>
-                    <fieldset id="display_date_time" class="layout-basic-show layout-thumbnail-show layout-dropcap-hide">
+                    <fieldset id="display_date_time" class="layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-hide">
                         <legend class="screen-reader-text"><span>Show date and time </span></legend>
                         <p>
                         	<label for="show_date_before_title"><input type="checkbox" checked="checked" value="0" id="show_date_before_title" name="show_date_before_title">
@@ -119,7 +123,7 @@ function lptw_recent_posts_manage_shortcodes () {
             <tr>
                 <th scope="row">Date Format</th>
                 <td>
-                	<fieldset id="date_formats" class="layout-basic-show layout-thumbnail-show layout-dropcap-hide">
+                	<fieldset id="date_formats" class="layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-hide">
                         <legend class="screen-reader-text"><span>Date Format</span></legend>
                     	<label title="d.m.Y"><input type="radio" checked="checked" value="d.m.Y" name="sb_date_format"> <span><?php echo date('d.m.Y'); ?></span></label><br>
                     	<label title="m/d/Y"><input type="radio" value="m/d/Y" name="sb_date_format"> <span><?php echo date('m/d/Y'); ?></span></label><br>
@@ -132,7 +136,7 @@ function lptw_recent_posts_manage_shortcodes () {
             <tr>
                 <th scope="row">Time Format</th>
                 <td>
-                	<fieldset id="time_formats" class="layout-basic-show layout-thumbnail-show layout-dropcap-hide">
+                	<fieldset id="time_formats" class="layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-hide">
                         <legend class="screen-reader-text"><span>Time Format</span></legend>
                     	<label title="H:i"><input type="radio" checked="checked" value="H:i" name="sb_time_format"> <span><?php echo date('H:i'); ?></span></label><br>
                     	<label title="H:i:s"><input type="radio" value="H:i:s" name="sb_time_format"> <span><?php echo date('H:i:s'); ?></span></label><br>
