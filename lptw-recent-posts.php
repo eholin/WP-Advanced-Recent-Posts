@@ -900,10 +900,6 @@ function lptw_display_recent_posts ( $atts ) {
                     $content .= '</div>
                             </a>
                         </header>';
-                    $my_excerpt = get_the_excerpt();
-                    if ( $my_excerpt != '' ) {
-                        $content .= '<content class="post-excerpt"><span>' . $my_excerpt . '</span></content>';
-                    }
                     $content .= '</article>';
                 }
                 else {
