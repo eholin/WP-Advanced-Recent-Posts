@@ -27,6 +27,12 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.2
+* Added Custom Post Types support
+
+## 0.6.1
+* Improved mobile version of the Responsive Grid Layout
+
 ## 0.6
 * New layout (shortcode) - Responsive Grid
 
