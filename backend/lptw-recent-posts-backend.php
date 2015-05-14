@@ -32,6 +32,19 @@ function lptw_recent_posts_manage_shortcodes () {
                     </fieldset>
                 </td>
             </tr>
+            <tr id="post_types">
+                <th scope="row"><label for="post_type">Post type:</label></th>
+                <td>
+                    <select id="post_type" name="post_type">
+                    <?php
+                        $post_types = get_post_types( '', 'names' );
+                        foreach ( $post_types as $post_type ) {
+                           echo '<option value="' . $post_type . '">' . $post_type . '</option>';
+                        }
+                    ?>
+                    </select>
+                </td>
+            </tr>
             <tr id="columns_and_width">
                 <th scope="row">Columns and width:</th>
                 <td>

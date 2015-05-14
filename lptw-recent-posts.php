@@ -3,8 +3,8 @@
 Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
-Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy
-Version: 0.6
+Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
+Version: 0.6.2
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -188,11 +188,14 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
 
+		$post_type = isset( $instance['post_type'] ) ? $instance['post_type'] : 'post';
+
         /* don't show post in recent if it shows in page */
         global $post;
         if (!empty($post) && $exclude_current_post == true) { $exclude_post = array( $post->ID ); }
 
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
+			'post_type'             => $post_type,
 			'posts_per_page'        => $number,
 			'no_found_rows'         => true,
 			'post_status'           => 'publish',
@@ -317,6 +320,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
         if ( isset( $instance[ 'post_category' ] ) ) { $post_category = $instance[ 'post_category' ]; }
 
+        if ( isset( $instance[ 'post_type' ] ) ) { $post_type = $instance[ 'post_type' ]; }
+        else { $post_type = 'post_type'; }
+
         // Widget admin form
         ?>
         <p>
@@ -325,6 +331,18 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_widget_title ); ?> id="<?php echo $this->get_field_id( 'show_widget_title' ); ?>" name="<?php echo $this->get_field_name( 'show_widget_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_widget_title' ); ?>"><?php _e( 'Display widget title?', 'lptw_recent_posts_domain' ); ?></label></p>
+
+		<p>
+			<label for="<?php echo $this->get_field_id('post_type'); ?>"><?php _e( 'Post type:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'post_type' ); ?>" id="<?php echo $this->get_field_id('post_type'); ?>" class="widefat">
+                <?php
+                    $post_types = get_post_types( '', 'names' );
+                    foreach ( $post_types as $registered_post_type ) {
+                        echo '<option value="' . $registered_post_type . '"'.selected( $post_type, $registered_post_type ).'>' . $registered_post_type . '</option>';
+                    }
+                ?>
+			</select>
+		</p>
 
         <div class="lptw-categories-dropdown"><a class="lptw-categories-dropdown-link" href="#">List of categories <span id="lptw-categories-action" class="lptw-categories-action-down"></span></a></div>
         <div id="lptw-categories-wrapper">
@@ -417,6 +435,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
             $instance['post_category'] = $terms;
 		} else { $instance['post_category'] = ''; }
 
+		$instance['post_type'] = strip_tags($new_instance['post_type']);
+
 		$this->flush_widget_cache();
 
 		$alloptions = wp_cache_get( 'alloptions', 'options' );
@@ -503,11 +523,14 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
 
+		$post_type = isset( $instance['post_type'] ) ? $instance['post_type'] : 'post';
+
         /* don't show post in recent if it shows in page */
         global $post;
         if (!empty($post) && $exclude_current_post == true) { $exclude_post = array( $post->ID ); }
 
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
+			'post_type'             => $post_type,
 			'posts_per_page'        => $number,
 			'no_found_rows'         => true,
 			'post_status'           => 'publish',
@@ -616,6 +639,9 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
         if ( isset( $instance[ 'post_category' ] ) ) { $post_category = $instance[ 'post_category' ]; }
 
+        if ( isset( $instance[ 'post_type' ] ) ) { $post_type = $instance[ 'post_type' ]; }
+        else { $post_type = 'post_type'; }
+
         // Widget admin form
         ?>
         <p>
@@ -624,6 +650,18 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_widget_title ); ?> id="<?php echo $this->get_field_id( 'show_widget_title' ); ?>" name="<?php echo $this->get_field_name( 'show_widget_title' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_widget_title' ); ?>"><?php _e( 'Display widget title?', 'lptw_recent_posts_domain' ); ?></label></p>
+
+		<p>
+			<label for="<?php echo $this->get_field_id('post_type'); ?>"><?php _e( 'Post type:', 'lptw_recent_posts_domain' ); ?></label>
+			<select name="<?php echo $this->get_field_name( 'post_type' ); ?>" id="<?php echo $this->get_field_id('post_type'); ?>" class="widefat">
+                <?php
+                    $post_types = get_post_types( '', 'names' );
+                    foreach ( $post_types as $registered_post_type ) {
+                        echo '<option value="' . $registered_post_type . '"'.selected( $post_type, $registered_post_type ).'>' . $registered_post_type . '</option>';
+                    }
+                ?>
+			</select>
+		</p>
 
         <div class="lptw-categories-dropdown"><a class="lptw-categories-dropdown-link" href="#">List of categories <span id="lptw-categories-action" class="lptw-categories-action-down"></span></a></div>
         <div id="lptw-categories-wrapper">
@@ -706,6 +744,8 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 			}
             $instance['post_category'] = $terms;
 		} else { $instance['post_category'] = ''; }
+
+		$instance['post_type'] = strip_tags($new_instance['post_type']);
 
 		$this->flush_widget_cache();
 
