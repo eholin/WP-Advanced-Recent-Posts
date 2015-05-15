@@ -27,6 +27,11 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.3
+* Added Custom Taxonomies Support
+* Added Color Picker for the background and text color for the Drop Cap Layout
+* Fixed bug with disabled columns in the Shortcode Builder
+
 ## 0.6.2
 * Added Custom Post Types support
 

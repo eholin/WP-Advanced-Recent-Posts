@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.2
+Version: 0.6.3
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -187,12 +187,28 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$color_scheme = isset( $instance['color_scheme'] ) ? $instance['color_scheme'] : 'light';
 
 		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
+        if (!empty($post_category)) { $post_category_str = implode (',', $post_category); }
 
 		$post_type = isset( $instance['post_type'] ) ? $instance['post_type'] : 'post';
 
         /* don't show post in recent if it shows in page */
         global $post;
         if (!empty($post) && $exclude_current_post == true) { $exclude_post = array( $post->ID ); }
+
+        if ( $post_type != 'post' ) {
+            if (!empty($post_category)) {
+                $tax_query = array('relation' => 'AND');
+             	$taxonomies = get_object_taxonomies($post_type);
+                if (!empty($taxonomies)) {
+                 	foreach ($taxonomies as $taxonomy) {
+                        $tax_array = array('taxonomy' => $taxonomy, 'field' => 'term_id', 'include_children' => false, 'terms' => $post_category);
+
+                        array_push ($tax_query, $tax_array);
+                 	}
+                }
+            } else { $tax_query = ''; }
+            $post_category = '';
+        }
 
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
 			'post_type'             => $post_type,
@@ -202,6 +218,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 			'ignore_sticky_posts'   => true,
             'post__not_in'          => $exclude_post,
             'category__in'          => $post_category,
+            'tax_query'             => $tax_query,
             'order'                 => 'DESC',
             'orderby'               => 'date'
 		) ) );
@@ -334,7 +351,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		<p>
 			<label for="<?php echo $this->get_field_id('post_type'); ?>"><?php _e( 'Post type:', 'lptw_recent_posts_domain' ); ?></label>
-			<select name="<?php echo $this->get_field_name( 'post_type' ); ?>" id="<?php echo $this->get_field_id('post_type'); ?>" class="widefat">
+			<select name="<?php echo $this->get_field_name( 'post_type' ); ?>" id="<?php echo $this->get_field_id('post_type'); ?>" class="widefat registered-post-types">
                 <?php
                     $post_types = get_post_types( '', 'names' );
                     foreach ( $post_types as $registered_post_type ) {
@@ -348,7 +365,30 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         <div id="lptw-categories-wrapper">
             <fieldset id="categories_list">
                 <ul class="lptw-categories-list">
-                    <?php wp_category_checklist(0, 0, $post_category); ?>
+                    <?php
+                     	$taxonomies = get_object_taxonomies($post_type);
+                        if (!empty($taxonomies)) {
+                            $categories_content = '';
+                         	foreach ($taxonomies as $taxonomy) {
+                         	    $args = array(
+                                    'taxonomy' => $taxonomy,
+                                    'orderby' => 'name',
+                                    'show_count' => 0,
+                                    'pad_counts' => 0,
+                                    'hierarchical' => 1,
+                                    'hide_empty' => 0
+                                );
+                         		$categories = get_categories($args);
+                         		foreach ($categories as $category) {
+                         		    if (is_array($post_category) && in_array($category->term_id, $post_category)) { $checked = 'checked="checked"'; }
+                                    else { $checked = ''; }
+                         		    $categories_content .= '<li id="category-' . $category->term_id . '"><label class="selectit"><input type="checkbox" id="in-category-' . $category->term_id . '" name="post_category[]" value="' . $category->term_id . '" '.$checked.'> ' . $category->name . '</label></li>' . "\n";
+                         		}
+                         	}
+                        } else { $categories_content = 'No taxonomies for selected post type'; }
+
+                        echo $categories_content;
+                    ?>
                 </ul>
             </fieldset>
             <p class="description">If none of the categories is selected - will be displayed posts from all categories.</p>
@@ -426,7 +466,6 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		if( isset( $_POST['post_category'] ) ) {
 		    $posted_terms = $_POST['post_category'];
-			// Once we actually have the $_POSTed terms, validate and and save them
 			foreach ( $posted_terms as $term ) {
 			    if( term_exists( absint( $term ), $taxonomy ) ) {
 				    $terms[] = absint( $term );
@@ -456,7 +495,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 -------------------------------------- Small Thumbnails Widget --------------------------------------
 **/
 
-// Creating the widget with fluid images
+// Creating the widget with small thumbnails
 class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
     function __construct() {
@@ -529,6 +568,21 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
         global $post;
         if (!empty($post) && $exclude_current_post == true) { $exclude_post = array( $post->ID ); }
 
+        if ( $post_type != 'post' ) {
+            if (!empty($post_category)) {
+                $tax_query = array('relation' => 'AND');
+             	$taxonomies = get_object_taxonomies($post_type);
+                if (!empty($taxonomies)) {
+                 	foreach ($taxonomies as $taxonomy) {
+                        $tax_array = array('taxonomy' => $taxonomy, 'field' => 'term_id', 'include_children' => false, 'terms' => $post_category);
+
+                        array_push ($tax_query, $tax_array);
+                 	}
+                }
+            } else { $tax_query = ''; }
+            $post_category = '';
+        }
+
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
 			'post_type'             => $post_type,
 			'posts_per_page'        => $number,
@@ -537,6 +591,7 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 			'ignore_sticky_posts'   => true,
             'post__not_in'          => $exclude_post,
             'category__in'          => $post_category,
+            'tax_query'             => $tax_query,
             'order'                 => 'DESC',
             'orderby'               => 'date'
 		) ) );
@@ -653,7 +708,7 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		<p>
 			<label for="<?php echo $this->get_field_id('post_type'); ?>"><?php _e( 'Post type:', 'lptw_recent_posts_domain' ); ?></label>
-			<select name="<?php echo $this->get_field_name( 'post_type' ); ?>" id="<?php echo $this->get_field_id('post_type'); ?>" class="widefat">
+			<select name="<?php echo $this->get_field_name( 'post_type' ); ?>" id="<?php echo $this->get_field_id('post_type'); ?>" class="widefat registered-post-types">
                 <?php
                     $post_types = get_post_types( '', 'names' );
                     foreach ( $post_types as $registered_post_type ) {
@@ -667,7 +722,30 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
         <div id="lptw-categories-wrapper">
             <fieldset id="categories_list">
                 <ul class="lptw-categories-list">
-                    <?php wp_category_checklist(0, 0, $post_category); ?>
+                    <?php
+                     	$taxonomies = get_object_taxonomies($post_type);
+                        if (!empty($taxonomies)) {
+                            $categories_content = '';
+                         	foreach ($taxonomies as $taxonomy) {
+                         	    $args = array(
+                                    'taxonomy' => $taxonomy,
+                                    'orderby' => 'name',
+                                    'show_count' => 0,
+                                    'pad_counts' => 0,
+                                    'hierarchical' => 1,
+                                    'hide_empty' => 0
+                                );
+                         		$categories = get_categories($args);
+                         		foreach ($categories as $category) {
+                         		    if (is_array($post_category) && in_array($category->term_id, $post_category)) { $checked = 'checked="checked"'; }
+                                    else { $checked = ''; }
+                         		    $categories_content .= '<li id="category-' . $category->term_id . '"><label class="selectit"><input type="checkbox" id="in-category-' . $category->term_id . '" name="post_category[]" value="' . $category->term_id . '" '.$checked.'> ' . $category->name . '</label></li>' . "\n";
+                         		}
+                         	}
+                        } else { $categories_content = 'No taxonomies for selected post type'; }
+
+                        echo $categories_content;
+                    ?>
                 </ul>
             </fieldset>
             <p class="description">If none of the categories is selected - will be displayed posts from all categories.</p>
@@ -799,7 +877,9 @@ function lptw_display_recent_posts ( $atts ) {
         'show_time'                 => 'true',
         'show_time_before'          => 'true',
         'show_date_before_title'    => 'true',
-        'reverse_post_order'        => 'false'
+        'reverse_post_order'        => 'false',
+        'background_color'          => '#4CAF50',
+        'text_color'                => '#ffffff'
     ), $atts );
 
     if ($a['width'] != '' || $a['height'] != '') {
@@ -820,14 +900,35 @@ function lptw_display_recent_posts ( $atts ) {
         }
     else { $exclude_post = ''; }
 
+    if ( strpos($a['category_id'], ',') !== false ) {
+        $post_category = array_map('intval', explode(',', $a['category_id']));
+    } else { $post_category = $a['category_id']; }
+
+    $tax_query = '';
+
+    if ( $a['post_type'] != 'post' && !empty($post_category) ) {
+        $tax_query = array('relation' => 'AND');
+        $taxonomies = get_object_taxonomies($a['post_type']);
+        if (!empty($taxonomies)) {
+            foreach ($taxonomies as $taxonomy) {
+                $tax_array = array('taxonomy' => $taxonomy, 'field' => 'term_id', 'terms' => $post_category, 'include_children' => false);
+                array_push ($tax_query, $tax_array);
+            }
+        }
+        $post_category = '';
+    }
+
     $args = array(
-        'post_type'       => $a['post_type'],
-        'cat'             => $a['category_id'],
-        'post_parent'     => $a['post_parent'],
-        'post__not_in'    => $exclude_post,
-        'posts_per_page'  => $a['posts_per_page'],
-        'order'           => 'DESC',
-        'orderby'         => 'date'
+        'post_type'             => $a['post_type'],
+        'posts_per_page'        => $a['posts_per_page'],
+		'no_found_rows'         => true,
+		'post_status'           => 'publish',
+		'ignore_sticky_posts'   => true,
+        'post__not_in'          => $exclude_post,
+        'category__in'          => $post_category,
+        'tax_query'             => $tax_query,
+        'order'                 => 'DESC',
+        'orderby'               => 'date'
         );
 
     $allnews = new WP_Query( $args );
@@ -910,9 +1011,9 @@ function lptw_display_recent_posts ( $atts ) {
 
                 $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
                 <header>
-                    <div class="lptw-dropcap-date">
-                        <span class="lptw-dropcap-day">'.$post_day.'</span>
-                        <span class="lptw-dropcap-month">'.$post_date.'</span>
+                    <div class="lptw-dropcap-date" style="background-color: '.$a['background_color'].'">
+                        <span class="lptw-dropcap-day" style="color: '.$a['text_color'].'">'.$post_day.'</span>
+                        <span class="lptw-dropcap-month" style="color: '.$a['text_color'].'">'.$post_date.'</span>
                     </div>
                     <a class="lptw-dropcap-date-link" href="'.get_the_permalink().'">'.get_the_title().'</a>
                 </header>
@@ -994,11 +1095,18 @@ function lptw_recent_posts_backend_scripts() {
 	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
 	wp_enqueue_style('lptw-recent-posts-backend-style' );
 
+    // Add the color picker css file
+    wp_enqueue_style( 'wp-color-picker' );
+
     wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'backend/lptw-recent-posts-shortcode-builder.js', __FILE__ ), array(), '0.3', true );
+
+    // Include our custom jQuery file with WordPress Color Picker dependency
+    wp_enqueue_script( 'custom-script-handle', plugins_url( 'custom-script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 }
 add_action( 'admin_enqueue_scripts', 'lptw_recent_posts_backend_scripts' );
 
 /* include shortcode builder  */
+//include( plugin_dir_path( __FILE__ ) . 'backend/color-picker.php');
 include( plugin_dir_path( __FILE__ ) . 'backend/lptw-recent-posts-backend.php');
 
 ?>

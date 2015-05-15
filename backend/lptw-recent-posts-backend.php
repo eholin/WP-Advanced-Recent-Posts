@@ -1,8 +1,69 @@
 <?php
 
-function lptw_recent_posts_manage_shortcodes () {
-    $default_posts_per_page = intval( get_option( 'posts_per_page', '10' ) );
-    ?>
+/* backend ajax */
+add_action('admin_footer', 'my_action_javascript'); // Write our JS below here
+function my_action_javascript() {
+	?>
+	<script type="text/javascript" >
+	jQuery(document).ready(function($) {
+
+        $('#post_type').change(function() {
+            var selected_post_type = $(this).val();
+    		var data = {
+    			'action': 'get_terms_list',
+    			'selected_post_type': selected_post_type
+    		};
+    		$.post(ajaxurl, data, function(response) {
+    			$('.lptw-list-categories').html(response);
+    		});
+        });
+	});
+	</script>
+<?php
+}
+
+add_action('wp_ajax_get_terms_list', 'get_terms_list_callback');
+function get_terms_list_callback() {
+    global $wpdb;
+
+    $selected_post_type = $_POST['selected_post_type'];
+
+    if ($_POST['widget_name']) {
+        $widget_option = get_option('widget_'.$_POST['widget_name']);
+        $post_category = $widget_option[$_POST['instance_id']]['post_category'];
+    }
+
+ 	$taxonomies = get_object_taxonomies($selected_post_type);
+    if (!empty($taxonomies)) {
+        $categories_content = '';
+     	foreach ($taxonomies as $taxonomy) {
+     	    $args = array(
+                'taxonomy' => $taxonomy,
+                'orderby' => 'name',
+                'show_count' => 0,
+                'pad_counts' => 0,
+                'hierarchical' => 1,
+                'hide_empty' => 0
+            );
+     		$categories = get_categories($args);
+     		foreach ($categories as $category) {
+     		    if (!empty($post_category)) {
+                    if (is_array($post_category) && in_array($category->term_id, $post_category)) { $checked = 'checked="checked"'; }
+                    else { $checked = ''; }
+                } else { $checked = ''; }
+     		    $categories_content .= '<li id="category-' . $category->term_id . '"><label class="selectit"><input type="checkbox" id="in-category-' . $category->term_id . '" name="post_category[]" value="' . $category->term_id . '" '.$checked.'> ' . $category->name . '</label></li>' . "\n";
+     		}
+     	}
+    } else { $categories_content = 'No taxonomies for selected post type'; }
+
+    echo $categories_content;
+ 	wp_die();
+}
+
+function lptw_recent_posts_manage_shortcodes() {
+    $default_posts_per_page = intval(get_option('posts_per_page', '10'));
+
+?>
     <div class="wrap">
     <h2>Advanced Recent Posts Shortcode Builder</h2>
     <table class="form-table">
@@ -37,10 +98,10 @@ function lptw_recent_posts_manage_shortcodes () {
                 <td>
                     <select id="post_type" name="post_type">
                     <?php
-                        $post_types = get_post_types( '', 'names' );
-                        foreach ( $post_types as $post_type ) {
-                           echo '<option value="' . $post_type . '">' . $post_type . '</option>';
-                        }
+                        $post_types = get_post_types('', 'names');
+                    	foreach ($post_types as $post_type) {
+                    	    echo '<option value="' . $post_type . '">' . $post_type . '</option>';
+                    	}
                     ?>
                     </select>
                 </td>
@@ -58,9 +119,9 @@ function lptw_recent_posts_manage_shortcodes () {
                         The width of the column in pixels, if not already selected adaptive layout.</label>
                     </div>
                     <div class="lptw-sb-row">
-                        <fieldset id="columns_count" class="layout-basic-show layout-grid-hide layout-thumbnail-show">
-                            <label for="sb_columns_1"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_1" value="1" checked="checked" disabled="disabled" />&nbsp;1 column</label>
-                            <label for="sb_columns_2"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_2" value="2" disabled="disabled" />&nbsp;2 columns</label>
+                        <fieldset class="layout-dropcap-show layout-basic-show layout-grid-hide layout-thumbnail-show" id="columns_count" disabled="disabled">
+                            <label for="sb_columns_1"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_1" value="1" checked="checked" />&nbsp;1 column</label>
+                            <label for="sb_columns_2"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_2" value="2" />&nbsp;2 columns</label>
                         </fieldset>
                     </div>
                 </td>
@@ -79,7 +140,7 @@ function lptw_recent_posts_manage_shortcodes () {
             <tr>
                 <th scope="row"><label for="posts_per_page">Posts per page:</label></th>
                 <td>
-                    <input type="number" class="small-text" value="<?php echo $default_posts_per_page; ?>" id="posts_per_page" min="1" step="1" name="posts_per_page">
+                    <input type="number" class="small-text" value="<?php echo $default_posts_per_page;?>" id="posts_per_page" min="1" step="1" name="posts_per_page">
                     <p class="description">Only for shortcode, not global!</p>
                     <p>
                         <label for="reverse_post_order"><input type="checkbox" value="0" id="reverse_post_order" name="reverse_post_order">
@@ -105,7 +166,21 @@ function lptw_recent_posts_manage_shortcodes () {
                         <option value="light">Light</option>
                     	<option value="dark" selected="selected">Dark</option>
                     </select>
-                    <p class="description">Only for Basic layout.</p>                    
+                    <p class="description">Only for Basic layout.</p>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="color_scheme">Colors for Drop Cap layout:</label></th>
+                <td>
+                    <div class="color-picker-wrapper">
+                        <label for="dropcap-background-color">Background color</label><br>
+                        <input type="text" value="#4CAF50" data-default-color="#4CAF50" class="color-field" name="dropcap-background-color" id="dropcap-background-color" />
+                    </div>
+                    <div class="color-picker-wrapper">
+                        <label for="dropcap-text-color">Text color</label><br>
+                        <input type="text" value="#ffffff" data-default-color="#ffffff" class="color-field" name="dropcap-text-color" id="dropcap-text-color" />
+                    </div>
+                    <p class="description">Only for Dropcap layout.</p>
                 </td>
             </tr>
             <tr>
@@ -138,11 +213,11 @@ function lptw_recent_posts_manage_shortcodes () {
                 <td>
                 	<fieldset id="date_formats" class="layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-hide">
                         <legend class="screen-reader-text"><span>Date Format</span></legend>
-                    	<label title="d.m.Y"><input type="radio" checked="checked" value="d.m.Y" name="sb_date_format"> <span><?php echo date('d.m.Y'); ?></span></label><br>
-                    	<label title="m/d/Y"><input type="radio" value="m/d/Y" name="sb_date_format"> <span><?php echo date('m/d/Y'); ?></span></label><br>
-                    	<label title="d/m/Y"><input type="radio" value="d/m/Y" name="sb_date_format"> <span><?php echo date('d/m/Y'); ?></span></label><br>
-                    	<label title="F j, Y"><input type="radio" value="F j, Y" name="sb_date_format"> <span><?php echo date('F j, Y'); ?></span></label><br>
-                    	<label title="M j, Y"><input type="radio" value="M j, Y" name="sb_date_format"> <span><?php echo date('M j, Y'); ?></span></label><br>
+                    	<label title="d.m.Y"><input type="radio" checked="checked" value="d.m.Y" name="sb_date_format"> <span><?php echo date('d.m.Y');?></span></label><br>
+                    	<label title="m/d/Y"><input type="radio" value="m/d/Y" name="sb_date_format"> <span><?php echo date('m/d/Y');?></span></label><br>
+                    	<label title="d/m/Y"><input type="radio" value="d/m/Y" name="sb_date_format"> <span><?php echo date('d/m/Y');?></span></label><br>
+                    	<label title="F j, Y"><input type="radio" value="F j, Y" name="sb_date_format"> <span><?php echo date('F j, Y');?></span></label><br>
+                    	<label title="M j, Y"><input type="radio" value="M j, Y" name="sb_date_format"> <span><?php echo date('M j, Y');?></span></label><br>
                 	</fieldset>
                 </td>
             </tr>
@@ -151,10 +226,10 @@ function lptw_recent_posts_manage_shortcodes () {
                 <td>
                 	<fieldset id="time_formats" class="layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-hide">
                         <legend class="screen-reader-text"><span>Time Format</span></legend>
-                    	<label title="H:i"><input type="radio" checked="checked" value="H:i" name="sb_time_format"> <span><?php echo date('H:i'); ?></span></label><br>
-                    	<label title="H:i:s"><input type="radio" value="H:i:s" name="sb_time_format"> <span><?php echo date('H:i:s'); ?></span></label><br>
-                    	<label title="g:i a"><input type="radio" value="g:i a" name="sb_time_format"> <span><?php echo date('g:i a'); ?></span></label><br>
-                    	<label title="g:i:s a"><input type="radio" value="g:i:s a" name="sb_time_format"> <span><?php echo date('g:i:s a'); ?></span></label><br>
+                    	<label title="H:i"><input type="radio" checked="checked" value="H:i" name="sb_time_format"> <span><?php echo date('H:i');?></span></label><br>
+                    	<label title="H:i:s"><input type="radio" value="H:i:s" name="sb_time_format"> <span><?php echo date('H:i:s');?></span></label><br>
+                    	<label title="g:i a"><input type="radio" value="g:i a" name="sb_time_format"> <span><?php echo date('g:i a');?></span></label><br>
+                    	<label title="g:i:s a"><input type="radio" value="g:i:s a" name="sb_time_format"> <span><?php echo date('g:i:s a');?></span></label><br>
                 	</fieldset>
                 </td>
             </tr>
@@ -170,7 +245,6 @@ function lptw_recent_posts_manage_shortcodes () {
         </tbody>
     </table>
     </div>
-    <?php
+<?php
 }
-
 ?>
