@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.3
+Version: 0.6.4
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -189,6 +189,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
         if (!empty($post_category)) { $post_category_str = implode (',', $post_category); }
 
+		$authors = isset( $instance['authors'] ) ? $instance['authors'] : array();
+
 		$post_type = isset( $instance['post_type'] ) ? $instance['post_type'] : 'post';
 
         /* don't show post in recent if it shows in page */
@@ -217,6 +219,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 			'post_status'           => 'publish',
 			'ignore_sticky_posts'   => true,
             'post__not_in'          => $exclude_post,
+            'author__in'            => $authors,
             'category__in'          => $post_category,
             'tax_query'             => $tax_query,
             'order'                 => 'DESC',
@@ -337,6 +340,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
         if ( isset( $instance[ 'post_category' ] ) ) { $post_category = $instance[ 'post_category' ]; }
 
+        if ( isset( $instance[ 'authors' ] ) ) { $authors = $instance[ 'authors' ]; }
+
         if ( isset( $instance[ 'post_type' ] ) ) { $post_type = $instance[ 'post_type' ]; }
         else { $post_type = 'post_type'; }
 
@@ -394,6 +399,26 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
             <p class="description">If none of the categories is selected - will be displayed posts from all categories.</p>
         </div>
 
+        <div class="chosen-container"><label for="<?php echo $this->get_field_id( 'authors' ); ?>"><?php _e( 'Select one or more authors:', 'lptw_recent_posts_domain' ); ?></label>
+            <?php
+                $authors_args = array(
+                    'who'          => 'authors'
+                );
+                $blog_authors = get_users( $authors_args );
+            ?>
+            <select id="<?php echo $this->get_field_id( 'authors' ); ?>" name="<?php echo $this->get_field_name( 'authors' ); ?>[]" multiple class="widefat chosen-select chosen-select-widget" data-placeholder="<?php _e( 'Authors', 'lptw_recent_posts_domain' ); ?>">
+            <?php
+                foreach ($blog_authors as $blog_author) {
+                    if (is_array($authors) && in_array($blog_author->id, $authors)) { $selected = 'selected="selected"'; }
+                    else { $selected = ''; }
+                    if ( $blog_author->first_name && $blog_author->last_name ) { $author_name = ' ('.$blog_author->first_name.' '.$blog_author->last_name.')'; }
+                    else { $author_name = ''; }
+                    echo '<option value="' . $blog_author->id . '" '.$selected.'>' . $blog_author->user_nicename . $author_name . '</option>';
+                }
+            ?>
+            </select>
+        </div>
+
 		<p><input class="checkbox" type="checkbox" <?php checked( $exclude_current_post ); ?> id="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>" name="<?php echo $this->get_field_name( 'exclude_current_post' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>"><?php _e( 'Exclude current post from list?', 'lptw_recent_posts_domain' ); ?></label></p>
 
@@ -439,6 +464,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		<p>
 			<label for="<?php echo $this->get_field_id('color_scheme'); ?>"><?php _e( 'Color scheme:', 'lptw_recent_posts_domain' ); ?></label>
 			<select name="<?php echo $this->get_field_name( 'color_scheme' ); ?>" id="<?php echo $this->get_field_id('color_scheme'); ?>" class="widefat">
+				<option value="no-overlay"<?php selected( $color_scheme, 'no-overlay' ); ?>><?php _e('Without overlay', 'lptw_recent_posts_domain'); ?></option>
 				<option value="light"<?php selected( $color_scheme, 'light' ); ?>><?php _e('Light', 'lptw_recent_posts_domain'); ?></option>
 				<option value="dark"<?php selected( $color_scheme, 'dark' ); ?>><?php _e('Dark', 'lptw_recent_posts_domain'); ?></option>
 			</select>
@@ -464,6 +490,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$instance['show_time_before'] = isset( $new_instance['show_time_before'] ) ? (bool) $new_instance['show_time_before'] : false;
 		$instance['color_scheme'] = strip_tags($new_instance['color_scheme']);
 
+        // need to replace $_POST by $new_instance as authors
 		if( isset( $_POST['post_category'] ) ) {
 		    $posted_terms = $_POST['post_category'];
 			foreach ( $posted_terms as $term ) {
@@ -473,6 +500,14 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 			}
             $instance['post_category'] = $terms;
 		} else { $instance['post_category'] = ''; }
+
+		if( isset( $new_instance['authors'] ) ) {
+		    $authors = $new_instance['authors'];
+			foreach ( $authors as $author ) {
+			    $authors_id[] = absint( $author );
+			}
+            $instance['authors'] = $authors_id;
+		} else { $instance['authors'] = ''; }
 
 		$instance['post_type'] = strip_tags($new_instance['post_type']);
 
@@ -562,6 +597,8 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
 
+		$authors = isset( $instance['authors'] ) ? $instance['authors'] : array();
+
 		$post_type = isset( $instance['post_type'] ) ? $instance['post_type'] : 'post';
 
         /* don't show post in recent if it shows in page */
@@ -590,6 +627,7 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 			'post_status'           => 'publish',
 			'ignore_sticky_posts'   => true,
             'post__not_in'          => $exclude_post,
+            'author__in'            => $authors,
             'category__in'          => $post_category,
             'tax_query'             => $tax_query,
             'order'                 => 'DESC',
@@ -694,6 +732,8 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
         if ( isset( $instance[ 'post_category' ] ) ) { $post_category = $instance[ 'post_category' ]; }
 
+        if ( isset( $instance[ 'authors' ] ) ) { $authors = $instance[ 'authors' ]; }
+
         if ( isset( $instance[ 'post_type' ] ) ) { $post_type = $instance[ 'post_type' ]; }
         else { $post_type = 'post_type'; }
 
@@ -749,6 +789,26 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
                 </ul>
             </fieldset>
             <p class="description">If none of the categories is selected - will be displayed posts from all categories.</p>
+        </div>
+
+        <div class="chosen-container"><label for="<?php echo $this->get_field_id( 'authors' ); ?>"><?php _e( 'Select one or more authors:', 'lptw_recent_posts_domain' ); ?></label>
+            <?php
+                $authors_args = array(
+                    'who'          => 'authors'
+                );
+                $blog_authors = get_users( $authors_args );
+            ?>
+            <select id="<?php echo $this->get_field_id( 'authors' ); ?>" name="<?php echo $this->get_field_name( 'authors' ); ?>[]" multiple class="widefat chosen-select chosen-select-widget" data-placeholder="<?php _e( 'Authors', 'lptw_recent_posts_domain' ); ?>">
+            <?php
+                foreach ($blog_authors as $blog_author) {
+                    if (is_array($authors) && in_array($blog_author->id, $authors)) { $selected = 'selected="selected"'; }
+                    else { $selected = ''; }
+                    if ( $blog_author->first_name && $blog_author->last_name ) { $author_name = ' ('.$blog_author->first_name.' '.$blog_author->last_name.')'; }
+                    else { $author_name = ''; }
+                    echo '<option value="' . $blog_author->id . '" '.$selected.'>' . $blog_author->user_nicename . $author_name . '</option>';
+                }
+            ?>
+            </select>
         </div>
 
 		<p><input class="checkbox" type="checkbox" <?php checked( $exclude_current_post ); ?> id="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>" name="<?php echo $this->get_field_name( 'exclude_current_post' ); ?>" />
@@ -812,9 +872,9 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		$instance['show_time'] = isset( $new_instance['show_time'] ) ? (bool) $new_instance['show_time'] : false;
 		$instance['show_time_before'] = isset( $new_instance['show_time_before'] ) ? (bool) $new_instance['show_time_before'] : false;
 
+        // need to replace $_POST by $new_instance as authors
 		if( isset( $_POST['post_category'] ) ) {
 		    $posted_terms = $_POST['post_category'];
-			// Once we actually have the $_POSTed terms, validate and and save them
 			foreach ( $posted_terms as $term ) {
 			    if( term_exists( absint( $term ), $taxonomy ) ) {
 				    $terms[] = absint( $term );
@@ -822,6 +882,14 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 			}
             $instance['post_category'] = $terms;
 		} else { $instance['post_category'] = ''; }
+
+		if( isset( $new_instance['authors'] ) ) {
+		    $authors = $new_instance['authors'];
+			foreach ( $authors as $author ) {
+			    $authors_id[] = absint( $author );
+			}
+            $instance['authors'] = $authors_id;
+		} else { $instance['authors'] = ''; }
 
 		$instance['post_type'] = strip_tags($new_instance['post_type']);
 
@@ -860,13 +928,14 @@ function lptw_display_recent_posts ( $atts ) {
     $a = shortcode_atts( array(
         'post_type'                 => 'post',
         'category_id'               => '',
+        'authors_id'                => '',
         'post_parent'               => '0',
         'posts_per_page'            => $default_posts_per_page,
         'exclude_posts'             => '',
         'thumbnail_size'            => 'thumbnail',
         'random_thumbnail'          => 'false',
         'layout'                    => 'basic',
-        'color_scheme'              => 'light',
+        'color_scheme'              => 'no-overlay',
         'show_date'                 => 'true',
         'fluid_images'              => 'false',
         'columns'                   => '1',
@@ -900,9 +969,13 @@ function lptw_display_recent_posts ( $atts ) {
         }
     else { $exclude_post = ''; }
 
+    if ( strpos($a['authors_id'], ',') !== false ) {
+        $authors_id = array_map('intval', explode(',', $a['authors_id']));
+    } else { $authors_id = (integer) $a['authors_id']; }
+
     if ( strpos($a['category_id'], ',') !== false ) {
         $post_category = array_map('intval', explode(',', $a['category_id']));
-    } else { $post_category = $a['category_id']; }
+    } else { $post_category = (integer) $a['category_id']; }
 
     $tax_query = '';
 
@@ -925,6 +998,7 @@ function lptw_display_recent_posts ( $atts ) {
 		'post_status'           => 'publish',
 		'ignore_sticky_posts'   => true,
         'post__not_in'          => $exclude_post,
+        'author__in'            => $authors_id,
         'category__in'          => $post_category,
         'tax_query'             => $tax_query,
         'order'                 => 'DESC',
@@ -1095,13 +1169,20 @@ function lptw_recent_posts_backend_scripts() {
 	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
 	wp_enqueue_style('lptw-recent-posts-backend-style' );
 
-    // Add the color picker css file
+    // Add the color picker css and js files
     wp_enqueue_style( 'wp-color-picker' );
+    wp_enqueue_script( 'wp-color-picker' );
 
-    wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'backend/lptw-recent-posts-shortcode-builder.js', __FILE__ ), array(), '0.3', true );
+    wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'backend/lptw-recent-posts-shortcode-builder.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
+
+    /* chosen css & js files */
+	wp_register_style('chosen-style', plugins_url( 'backend/chosen/chosen.min.css', __FILE__ ) );
+	wp_enqueue_style('chosen-style' );
+
+    wp_enqueue_script( 'chosen-script', plugins_url ( 'backend/chosen/chosen.jquery.min.js', __FILE__ ), array(), '1.4.2', true );
 
     // Include our custom jQuery file with WordPress Color Picker dependency
-    wp_enqueue_script( 'custom-script-handle', plugins_url( 'custom-script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
+    //wp_enqueue_script( 'custom-script-handle', plugins_url( 'custom-script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 }
 add_action( 'admin_enqueue_scripts', 'lptw_recent_posts_backend_scripts' );
 

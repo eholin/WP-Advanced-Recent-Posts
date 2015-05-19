@@ -106,6 +106,28 @@ function lptw_recent_posts_manage_shortcodes() {
                     </select>
                 </td>
             </tr>
+            <tr id="post_types">
+                <th scope="row"><label for="authors">Authors:</label></th>
+                <td>
+                    <?php
+                        $authors_args = array(
+                            'who'          => 'authors'
+                        );
+                        $blog_authors = get_users( $authors_args );
+                    ?>
+                    <select id="authors" name="authors" multiple class="chosen-select" data-placeholder="Select one or more authors">
+                    <?php
+
+                    	foreach ($blog_authors as $blog_author) {
+                    	    if ( $blog_author->first_name && $blog_author->last_name ) { $author_name = ' ('.$blog_author->first_name.' '.$blog_author->last_name.')'; }
+                            else { $author_name = ''; }
+                    	    echo '<option value="' . $blog_author->id . '">' . $blog_author->user_nicename . $author_name . '</option>';
+                    	}
+                    ?>
+                    </select>
+                    <p class="description">If none of the authors is selected - will be displayed the posts of all the authors.</p>
+                </td>
+            </tr>
             <tr id="columns_and_width">
                 <th scope="row">Columns and width:</th>
                 <td>
@@ -134,7 +156,7 @@ function lptw_recent_posts_manage_shortcodes() {
                         <?php wp_category_checklist(); ?>
                         </ul>
                     </fieldset>
-                    <p class="description">If none of the categories is selected - display posts from all categories.</p>
+                    <p class="description">If none of the categories is selected - will be displayed the posts from all the categories.</p>
                 </td>
             </tr>
             <tr>
@@ -163,8 +185,9 @@ function lptw_recent_posts_manage_shortcodes() {
                 <th scope="row"><label for="color_scheme">Color scheme:</label></th>
                 <td>
                     <select class="layout-basic-show layout-grid-show layout-thumbnail-hide layout-dropcap-hide" id="color_scheme" name="color_scheme">
+                        <option value="no-overlay" selected="selected">Without overlay</option>
                         <option value="light">Light</option>
-                    	<option value="dark" selected="selected">Dark</option>
+                    	<option value="dark">Dark</option>
                     </select>
                     <p class="description">Only for Basic layout.</p>
                 </td>

@@ -29,10 +29,26 @@ jQuery(document).ready(function($) {
         });
     });
 
+    /* Add chosen style to authors dropdown */
+    $(".chosen-select-widget").chosen({
+        width: "100%"
+    });
+
+    /* re-init choosen after ajax complete */
+    $( document ).ajaxComplete(function() {
+        $(".chosen-select-widget").chosen({
+            width: "100%"
+        });
+        /*$(".chosen-select-widget").trigger("liszt:updated");*/
+    });
+
+    /* shortcode builder scripts */
+
     /* Add Color Picker to all inputs that have 'color-field' class */
     $('.color-field').wpColorPicker();
 
-    /* shortcode builder scripts */
+    /* Add chosen style to authors dropdown */
+    $("#authors").chosen();
 
     $("#lptw_generate_shortcode").click(function(e) {
         var sb_layout = $('input[name="sb_layout"]:checked', '#layout-types').val();
@@ -45,10 +61,14 @@ jQuery(document).ready(function($) {
         });
         var sb_category_id = post_category_selected.toString();
 
+        var sb_authors = $("#authors").chosen().val();
+        if (sb_authors === null) { sb_authors = ''; }
+        else { sb_authors = sb_authors.toString(); }
+
         if ($("#sb_fluid_images").is(":checked") == true) {
             var sb_fluid_images = "true";
-            var sb_width = "";
-            var sb_columns = "";
+            var sb_width = '';
+            var sb_columns = '';
         } else {
             var sb_fluid_images = "false";
             var sb_width = $("#sb_width").val();
@@ -143,7 +163,10 @@ jQuery(document).ready(function($) {
         if (sb_post_type != '') {
             shortcode += ' post_type="' + sb_post_type + '"';
         }
-        if (sb_category_id != '') {
+        if (sb_authors != ''){
+            shortcode += ' authors_id="' + sb_authors + '"';
+        }
+        if (sb_category_id != ''){
             shortcode += ' category_id="' + sb_category_id + '"';
         }
         if (sb_fluid_images != "") {

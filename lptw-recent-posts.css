@@ -1,6 +1,14 @@
 /*-------------------------------------------------------------->>> TABLE OF CONTENTS:----------------------------------------------------------------1 Common styles2 Widgets styles	2.1 Fluid images widget	2.2 Small thumbnails widget3 Shortcodes styles	3.1 Basic layout	3.2 Thumbnail layout	3.3 Drop cap layout    3.4 Grid layout--------------------------------------------------------------*/
 /** * 1/* -------------------------- start common styles -------------------------- */
 
+.overlay-no-overlay::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
 .overlay-dark::before {
     content: "";
     position: absolute;

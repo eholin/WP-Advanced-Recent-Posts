@@ -21,11 +21,15 @@ Customization of the plugin is wery simple an flexible:
 * Widgets are configured into Dashboard -> Appearance -> Widgets
 * Shortcodes are configured in plugin shortcode builder, you will see it in the admin menu of your WordPress
 
-There are two predefined color schemes (for Basic and Grid layout): dark and light, but you can set up your own scheme.
+There are two predefined color schemes (for Basic and Grid layout): dark and light, but you can set up your own scheme. Or use natural images.
 
 Better to see once than read a hundred times - see the [live demo](http://demo.lp-tricks.com/) on my website :)
 
 # Changelog
+
+## 0.6.4
+* Added filter by Post authors in the shortcode and widgets
+* Added new color scheme (both widgets and shortcode) - natural image colors, without any overlay
 
 ## 0.6.3
 * Added Custom Taxonomies Support
