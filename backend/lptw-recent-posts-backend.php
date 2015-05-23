@@ -91,6 +91,8 @@ function lptw_recent_posts_manage_shortcodes() {
                             </li>
                         </ul>
                     </fieldset>
+                    <label for="no_thumbnails"><input type="checkbox" value="hide" id="no_thumbnails" name="no_thumbnails">
+                    Do not display Posts without Featured Image.</label>
                 </td>
             </tr>
             <tr id="post_types">
@@ -173,7 +175,7 @@ function lptw_recent_posts_manage_shortcodes() {
             <tr>
                 <th scope="row"><label for="thumbnail_size">Image size:</label></th>
                 <td>
-                    <select class="layout-basic-show layout-grid-hide layout-thumbnail-hide" id="thumbnail_size" name="thumbnail_size">
+                    <select class="layout-basic-show layout-dropcap-hide layout-grid-hide layout-thumbnail-hide" id="thumbnail_size" name="thumbnail_size">
                         <option value="thumbnail">Thumbnail</option>
                     	<option value="medium" selected="selected">Medium</option>
                     	<option value="large">Large</option>
@@ -193,7 +195,7 @@ function lptw_recent_posts_manage_shortcodes() {
                 </td>
             </tr>
             <tr>
-                <th scope="row"><label for="color_scheme">Colors for Drop Cap layout:</label></th>
+                <th scope="row"><label for="color_scheme">Colors:</label></th>
                 <td>
                     <div class="color-picker-wrapper">
                         <label for="dropcap-background-color">Background color</label><br>
@@ -203,7 +205,7 @@ function lptw_recent_posts_manage_shortcodes() {
                         <label for="dropcap-text-color">Text color</label><br>
                         <input type="text" value="#ffffff" data-default-color="#ffffff" class="color-field" name="dropcap-text-color" id="dropcap-text-color" />
                     </div>
-                    <p class="description">Only for Dropcap layout.</p>
+                    <p class="description">For Drop Cap layout. Also used in other Layouts if the Posts have no Featured Image.</p>
                 </td>
             </tr>
             <tr>

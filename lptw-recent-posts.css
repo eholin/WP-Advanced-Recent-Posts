@@ -8,7 +8,6 @@
     width: 100%;
     height: 100%;
 }
-
 .overlay-dark::before {
     content: "";
     position: absolute;
@@ -207,6 +206,19 @@ ul.lptw-recent-posts-thumbnails-widget {
 .basic-layout .lptw-post-thumbnail img {
     line-height: 0.5em;
 }
+.basic-layout .lptw-thumbnail-noimglink {
+    display: block;
+    width: 100%;
+    min-height: 200px;
+}
+.basic-layout .user-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
 .basic-layout .lptw-post-header {
     position: absolute;
     bottom: 0;
@@ -254,6 +266,17 @@ ul.lptw-recent-posts-thumbnails-widget {
     display: block;
     float: left;
     margin-right: 1em;
+}
+.thumbnail-layout .lptw-thumbnail-noimglink {
+    display: block;
+    float: left;
+    margin-right: 1rem;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    font-size: 3em;
+    font-weight: 600;
 }
 .thumbnail-layout .lptw-post-header {
     color: #333333;
@@ -377,11 +400,9 @@ ul.lptw-recent-posts-thumbnails-widget {
 /* 640 */
 
 {
-
     .lptw-grid-element.w3 {
         width: 320px;
         height: 213px;
-
     }
     .lptw-grid-element.w3 .lptw-post-date {
         font-size: 1.25em;

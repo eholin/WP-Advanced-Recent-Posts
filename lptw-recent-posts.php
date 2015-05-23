@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.4
+Version: 0.6.5
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -160,6 +160,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		$show_widget_title = isset( $instance['show_widget_title'] ) ? $instance['show_widget_title'] : true;
 		$exclude_current_post = isset( $instance['exclude_current_post'] ) ? $instance['exclude_current_post'] : true;
+		$no_thumbnails = isset( $instance['no_thumbnails'] ) ? $instance['no_thumbnails'] : false;
 
 		$title = ( ! empty( $instance['title'] ) ) ? $instance['title'] : __( 'Recent Posts', 'lptw_recent_posts_domain' );
 
@@ -212,6 +213,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
             $post_category = '';
         }
 
+        if ($no_thumbnails == 'on') { $meta_key = '_thumbnail_id'; }
+        else { $meta_key = ''; }
+
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
 			'post_type'             => $post_type,
 			'posts_per_page'        => $number,
@@ -223,7 +227,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
             'category__in'          => $post_category,
             'tax_query'             => $tax_query,
             'order'                 => 'DESC',
-            'orderby'               => 'date'
+            'orderby'               => 'date',
+            'meta_key'              => $meta_key
 		) ) );
 
 		if ($r->have_posts()) :
@@ -307,6 +312,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
         if ( isset( $instance[ 'exclude_current_post' ] ) ) { $exclude_current_post = (bool) $instance[ 'exclude_current_post' ]; }
         else { $exclude_current_post = true; }
+
+        if ( isset( $instance[ 'no_thumbnails' ] ) ) { $no_thumbnails = (bool) $instance[ 'no_thumbnails' ]; }
+        else { $no_thumbnails = false; }
 
         if ( isset( $instance[ 'number' ] ) ) { $number = absint( $instance[ 'number' ] ); }
         else { $number = 5; }
@@ -419,8 +427,11 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
             </select>
         </div>
 
+		<p><input class="checkbox" type="checkbox" <?php checked( $no_thumbnails ); ?> id="<?php echo $this->get_field_id( 'no_thumbnails' ); ?>" name="<?php echo $this->get_field_name( 'no_thumbnails' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'no_thumbnails' ); ?>"><?php _e( 'Do not display Posts without Featured Image', 'lptw_recent_posts_domain' ); ?></label></p>
+
 		<p><input class="checkbox" type="checkbox" <?php checked( $exclude_current_post ); ?> id="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>" name="<?php echo $this->get_field_name( 'exclude_current_post' ); ?>" />
-		<label for="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>"><?php _e( 'Exclude current post from list?', 'lptw_recent_posts_domain' ); ?></label></p>
+		<label for="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>"><?php _e( 'Exclude the current Post from list', 'lptw_recent_posts_domain' ); ?></label></p>
 
 		<p><label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php _e( 'Number of posts to show:', 'lptw_recent_posts_domain' ); ?></label>
 		<input id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="text" value="<?php echo $number; ?>" size="3" /></p>
@@ -479,6 +490,7 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['show_widget_title'] = isset( $new_instance['show_widget_title'] ) ? (bool) $new_instance['show_widget_title'] : false;
 		$instance['exclude_current_post'] = isset( $new_instance['exclude_current_post'] ) ? (bool) $new_instance['exclude_current_post'] : false;
+		$instance['no_thumbnails'] = isset( $new_instance['no_thumbnails'] ) ? (bool) $new_instance['no_thumbnails'] : false;
 		$instance['reverse_post_order'] = isset( $new_instance['reverse_post_order'] ) ? (bool) $new_instance['reverse_post_order'] : false;
 		$instance['number'] = (int) $new_instance['number'];
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
@@ -570,6 +582,7 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
 		$show_widget_title = isset( $instance['show_widget_title'] ) ? $instance['show_widget_title'] : true;
 		$exclude_current_post = isset( $instance['exclude_current_post'] ) ? $instance['exclude_current_post'] : true;
+		$no_thumbnails = isset( $instance['no_thumbnails'] ) ? $instance['no_thumbnails'] : false;
 
 		$title = ( ! empty( $instance['title'] ) ) ? $instance['title'] : __( 'Recent Posts', 'lptw_recent_posts_domain' );
 
@@ -620,6 +633,9 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
             $post_category = '';
         }
 
+        if ($no_thumbnails == 'on') { $meta_key = '_thumbnail_id'; }
+        else { $meta_key = ''; }
+
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
 			'post_type'             => $post_type,
 			'posts_per_page'        => $number,
@@ -631,7 +647,8 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
             'category__in'          => $post_category,
             'tax_query'             => $tax_query,
             'order'                 => 'DESC',
-            'orderby'               => 'date'
+            'orderby'               => 'date',
+            'meta_key'              => $meta_key
 		) ) );
 
 		if ($r->have_posts()) :
@@ -702,6 +719,9 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 
         if ( isset( $instance[ 'exclude_current_post' ] ) ) { $exclude_current_post = (bool) $instance[ 'exclude_current_post' ]; }
         else { $exclude_current_post = true; }
+
+        if ( isset( $instance[ 'no_thumbnails' ] ) ) { $no_thumbnails = (bool) $instance[ 'no_thumbnails' ]; }
+        else { $no_thumbnails = false; }
 
         if ( isset( $instance[ 'number' ] ) ) { $number = absint( $instance[ 'number' ] ); }
         else { $number = 5; }
@@ -811,8 +831,11 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
             </select>
         </div>
 
+		<p><input class="checkbox" type="checkbox" <?php checked( $no_thumbnails ); ?> id="<?php echo $this->get_field_id( 'no_thumbnails' ); ?>" name="<?php echo $this->get_field_name( 'no_thumbnails' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'no_thumbnails' ); ?>"><?php _e( 'Do not display Posts without Featured Image', 'lptw_recent_posts_domain' ); ?></label></p>
+
 		<p><input class="checkbox" type="checkbox" <?php checked( $exclude_current_post ); ?> id="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>" name="<?php echo $this->get_field_name( 'exclude_current_post' ); ?>" />
-		<label for="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>"><?php _e( 'Exclude current post from list?', 'lptw_recent_posts_domain' ); ?></label></p>
+		<label for="<?php echo $this->get_field_id( 'exclude_current_post' ); ?>"><?php _e( 'Exclude the current Post from list', 'lptw_recent_posts_domain' ); ?></label></p>
 
 		<p><label for="<?php echo $this->get_field_id( 'number' ); ?>"><?php _e( 'Number of posts to show:', 'lptw_recent_posts_domain' ); ?></label>
 		<input id="<?php echo $this->get_field_id( 'number' ); ?>" name="<?php echo $this->get_field_name( 'number' ); ?>" type="text" value="<?php echo $number; ?>" size="3" /></p>
@@ -862,6 +885,7 @@ class lptw_recent_posts_thumbnails_widget extends WP_Widget {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['show_widget_title'] = isset( $new_instance['show_widget_title'] ) ? (bool) $new_instance['show_widget_title'] : false;
 		$instance['exclude_current_post'] = isset( $new_instance['exclude_current_post'] ) ? (bool) $new_instance['exclude_current_post'] : false;
+		$instance['no_thumbnails'] = isset( $new_instance['no_thumbnails'] ) ? (bool) $new_instance['no_thumbnails'] : false;
 		$instance['number'] = (int) $new_instance['number'];
 		$instance['reverse_post_order'] = isset( $new_instance['reverse_post_order'] ) ? (bool) $new_instance['reverse_post_order'] : false;
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
@@ -948,7 +972,8 @@ function lptw_display_recent_posts ( $atts ) {
         'show_date_before_title'    => 'true',
         'reverse_post_order'        => 'false',
         'background_color'          => '#4CAF50',
-        'text_color'                => '#ffffff'
+        'text_color'                => '#ffffff',
+        'no_thumbnails'             => 'hide'
     ), $atts );
 
     if ($a['width'] != '' || $a['height'] != '') {
@@ -957,6 +982,9 @@ function lptw_display_recent_posts ( $atts ) {
         if ($a['height'] != '') {$dim_style .= 'height:'.$a['height'].'px;';}
         $dim_style .= '"';
     }
+
+    if ($a['no_thumbnails'] == 'hide') { $meta_key = '_thumbnail_id'; }
+    else { $meta_key = ''; }
 
     if ($a['fluid_images'] == 'true') { $dim_style = 'style="width:100%;"'; }
 
@@ -1002,7 +1030,8 @@ function lptw_display_recent_posts ( $atts ) {
         'category__in'          => $post_category,
         'tax_query'             => $tax_query,
         'order'                 => 'DESC',
-        'orderby'               => 'date'
+        'orderby'               => 'date',
+        'meta_key'              => $meta_key
         );
 
     $allnews = new WP_Query( $args );
@@ -1044,17 +1073,20 @@ function lptw_display_recent_posts ( $atts ) {
             /* start layouts output */
             /* basic layout - one or tho columns, fixed or adaptive width */
             if ($a['layout'] == 'basic' ) {
-                $content .= '
-                <article class="basic-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
-                    <header>
-                        <a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>
-                        <div class="lptw-post-header">';
+                $content .= '<article class="basic-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'><header>';
+                if ($url != '') {$content .= '<a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>';}
+                else {
+                    $content .= '<a href="'.get_the_permalink().'" class="lptw-thumbnail-noimglink"><div class="user-overlay" style="background-color: '.$a['background_color'].';"></div>';
+                    $a['color-scheme'] = 'user';
+                    $user_text_color = 'style="color: '.$a['text_color'].';"';
+                    }
+                $content .= '<div class="lptw-post-header">';
                 if ( $a['show_date_before_title'] == 'true' ) {
-                	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
-            		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
+                	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
+            		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
                 } else {
-            		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
-                	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+            		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
+                	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
                 }
                 $content .= '</div>
                         </a>
@@ -1064,19 +1096,25 @@ function lptw_display_recent_posts ( $atts ) {
             /* small thumbnails */
             } elseif ($a['layout'] == 'thumbnail' ) {
                 $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), array ( 100,100 ) );
-                $url_100 = $thumb_100['0'];
-                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
-                    <a href="'.get_the_permalink().'" class="lptw-thumbnail-link"><img src="'.$url_100.'" width="100" height="100" alt="'.get_the_title().'" /></a>
-                    <header class="lptw-post-header">';
+                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>';
+                $title = get_the_title();
+                if ($thumb_100 == '') {
+                    $first_letter = substr($title, 0, 1);
+                    $content .= '<a href="'.get_the_permalink().'" class="lptw-thumbnail-noimglink" style="background-color: '.$a['background_color'].'; color: '.$a['text_color'].';">'.$first_letter.'</a>';
+                } else {
+                    $url_100 = $thumb_100['0'];
+                    $content .= '<a href="'.get_the_permalink().'" class="lptw-thumbnail-link"><img src="'.$url_100.'" width="100" height="100" alt="'.$title.'" /></a>';
+                }
+                $content .= '<header class="lptw-post-header">';
                 if ( $a['show_date_before_title'] == 'true' ) {
                     if ( $a['show_date'] == 'true') { $content .= '<span class="lptw-post-date">'.$post_date_time.'</span>'; }
-            		$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>';
+                	$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>';
                 } else {
-            		$content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>';
+                    $content .= '<a href="'.get_the_permalink().'" class="lptw-post-title">'.get_the_title().'</a>';
                     if ( $a['show_date'] == 'true') { $content .= '<span class="lptw-post-date">'.$post_date_time.'</span>'; }
                 }
-                $content .= '</header>
-                </article>';
+                $content .= '</header>';
+                $content .= '</article>';
 
             /* recent posts without thumbnails, with date as drop cap */
             } elseif ($a['layout'] == 'dropcap' ) {
