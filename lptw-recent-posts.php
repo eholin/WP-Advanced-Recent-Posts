@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.5
+Version: 0.6.6
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -16,11 +16,8 @@ function lptw_recent_posts_register_scripts() {
 	wp_register_style( 'lptw-style', plugins_url( 'lptw-recent-posts.css', __FILE__ ) );
 	wp_enqueue_style( 'lptw-style' );
 
-	wp_enqueue_script( 'jquery-masonry' );
-
-    wp_enqueue_script( 'lptw-recent-posts-script', plugins_url( 'lptw-recent-posts.js', __FILE__ ), array(), '0.5', true );
+    wp_enqueue_script( 'lptw-recent-posts-script', plugins_url( 'lptw-recent-posts.js', __FILE__ ), array('jquery', 'jquery-masonry'), '0.5', true );
 }
-
 add_action( 'wp_enqueue_scripts', 'lptw_recent_posts_register_scripts' );
 
 /* register custom image size for Grid Layout */
@@ -29,7 +26,7 @@ function lptw_recent_posts_activate () {
 }
 
 /* trim excerpt to custom size */
-function custom_excerpt ($limit) {
+function lptw_custom_excerpt ($limit) {
       $excerpt = explode(' ', get_the_excerpt(), $limit);
       if (count($excerpt)>=$limit) {
         array_pop($excerpt);
@@ -944,8 +941,6 @@ add_action( 'widgets_init', 'lptw_recent_posts_load_widget' );
 -------------------------------------- Shortcode --------------------------------------
 **/
 
-// all-news-small-thumb
-
 function lptw_display_recent_posts ( $atts ) {
     $default_posts_per_page =  get_option( 'posts_per_page', '10' );
 
@@ -1019,7 +1014,7 @@ function lptw_display_recent_posts ( $atts ) {
         $post_category = '';
     }
 
-    $args = array(
+    $lptw_shortcode_query_args = array(
         'post_type'             => $a['post_type'],
         'posts_per_page'        => $a['posts_per_page'],
 		'no_found_rows'         => true,
@@ -1034,14 +1029,14 @@ function lptw_display_recent_posts ( $atts ) {
         'meta_key'              => $meta_key
         );
 
-    $allnews = new WP_Query( $args );
-    if( $allnews->have_posts() ) {
-        if ($a['reverse_post_order'] == 'true') { $allnews->posts = array_reverse($allnews->posts); }
+    $lptw_shortcode_query = new WP_Query( $lptw_shortcode_query_args );
+    if( $lptw_shortcode_query->have_posts() ) {
+        if ($a['reverse_post_order'] == 'true') { $lptw_shortcode_query->posts = array_reverse($lptw_shortcode_query->posts); }
         $i=0;
         $content = '';
         if ($a['layout'] == 'grid-medium') {$content .= '<div id="grid-container">';}
-        while( $allnews->have_posts() ) {
-            $allnews->the_post();
+        while( $lptw_shortcode_query->have_posts() ) {
+            $lptw_shortcode_query->the_post();
 
             $post_id = get_the_ID();
 
@@ -1177,7 +1172,7 @@ function lptw_display_recent_posts ( $atts ) {
                         $my_excerpt = get_the_excerpt();
                         $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'">' . $my_excerpt . '</content>';
                     } else {
-                        $my_excerpt = custom_excerpt(35);
+                        $my_excerpt = lptw_custom_excerpt(35);
                         $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'">' . $my_excerpt . '</content>';
                     }
                     $content .= '</article>';
@@ -1185,12 +1180,13 @@ function lptw_display_recent_posts ( $atts ) {
             }
 
             $i++;
-        } // end while( $allnews->have_posts() )
+        } // end while( $lptw_shortcode_query->have_posts() )
         if ($a['layout'] == 'grid-medium') {$content .= '</div>';}
-        return $content;
     } else {
-        return __( 'No recent posts', 'lptw_recent_posts_domain' );
+        $content = __( 'No recent posts', 'lptw_recent_posts_domain' );
     }
+    wp_reset_postdata();
+    return $content;
 }
 
 add_shortcode( 'lptw_recentposts', 'lptw_display_recent_posts' );
@@ -1207,9 +1203,8 @@ function lptw_recent_posts_backend_scripts() {
 	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
 	wp_enqueue_style('lptw-recent-posts-backend-style' );
 
-    // Add the color picker css and js files
+    // Add the color picker css styles
     wp_enqueue_style( 'wp-color-picker' );
-    wp_enqueue_script( 'wp-color-picker' );
 
     wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'backend/lptw-recent-posts-shortcode-builder.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 
@@ -1218,14 +1213,10 @@ function lptw_recent_posts_backend_scripts() {
 	wp_enqueue_style('chosen-style' );
 
     wp_enqueue_script( 'chosen-script', plugins_url ( 'backend/chosen/chosen.jquery.min.js', __FILE__ ), array(), '1.4.2', true );
-
-    // Include our custom jQuery file with WordPress Color Picker dependency
-    //wp_enqueue_script( 'custom-script-handle', plugins_url( 'custom-script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 }
 add_action( 'admin_enqueue_scripts', 'lptw_recent_posts_backend_scripts' );
 
 /* include shortcode builder  */
-//include( plugin_dir_path( __FILE__ ) . 'backend/color-picker.php');
 include( plugin_dir_path( __FILE__ ) . 'backend/lptw-recent-posts-backend.php');
 
 ?>

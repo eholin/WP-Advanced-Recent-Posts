@@ -27,6 +27,9 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.6
+* Fixed issue with incorrect interaction with other posts, comments, plug-ins, etc., which displays the content on the same page, which is inserted a shortcode.
+
 ## 0.6.5
 * Changes in the widgets and shortcodes - now you can exclude the Posts without Featured Image from the Posts list. 
 * Changes in the Fluid Images Layout - now if the Post have no Featured Image, the block with background displayed instead of the Featured Image. Background and text color you can choose in the Shortcode Builder. In widget this feature will be available soon.
