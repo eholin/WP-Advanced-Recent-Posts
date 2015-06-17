@@ -74,12 +74,18 @@ jQuery(document).ready(function($) {
         if ($("#sb_fluid_images").is(":checked") == true) {
             var sb_fluid_images = "true";
             var sb_width = '';
-            var sb_columns = '';
         } else {
             var sb_fluid_images = "false";
             var sb_width = $("#sb_width").val();
-            var sb_columns = $('input[name="sb_columns"]:checked', '#columns_count').val();
         }
+
+        var sb_space_hor = $("#sb_space_hor").val();
+
+        var sb_space_ver = $("#sb_space_ver").val();
+
+        var sb_height = $("#sb_height").val();
+
+        var sb_columns = $('#sb_columns').val();
 
         var sb_posts_per_page = $("#posts_per_page").val();
 
@@ -124,16 +130,16 @@ jQuery(document).ready(function($) {
         /* clear unused options depending on layout */
 
         /* basic layout */
-        /*
         if (sb_layout == 'basic') {
+          sb_height = '';
         }
-        */
 
         /* thumbnail layout */
         if (sb_layout == 'thumbnail') {
             sb_fluid_images = '';
             sb_thumbnail_size = '';
             sb_color_scheme = '';
+            sb_height = '';
         }
 
         /* dropcap layout */
@@ -147,14 +153,12 @@ jQuery(document).ready(function($) {
             sb_show_time = '';
             sb_show_time_before = '';
             sb_show_date_before_title = '';
+            sb_height = '';
         }
 
         /* responsive grid layout */
         if (sb_layout == 'grid-medium') {
-            sb_fluid_images = '';
             sb_thumbnail_size = '';
-            sb_width = '';
-            sb_columns = '';
             sb_dropcap_background_color = '';
             sb_dropcap_text_color = '';
         }
@@ -178,6 +182,15 @@ jQuery(document).ready(function($) {
         }
         if (sb_width != '') {
             shortcode += ' width="' + sb_width + '"';
+        }
+        if (sb_height != '') {
+            shortcode += ' height="' + sb_height + '"';
+        }
+        if (sb_space_hor != '') {
+            shortcode += ' space_hor="' + sb_space_hor + '"';
+        }
+        if (sb_space_ver != '') {
+            shortcode += ' space_ver="' + sb_space_ver + '"';
         }
         if (sb_columns != '') {
             shortcode += ' columns="' + sb_columns + '"';
@@ -233,11 +246,6 @@ jQuery(document).ready(function($) {
         $('#sb_width').prop('disabled', function(i, v) {
             return !v;
         });
-        if ($("#sb_fluid_images").is(":checked") == true) {
-            $('#columns_count').prop('disabled', true);
-        } else {
-            $('#columns_count').prop('disabled', false);
-        }
     });
 
     $(".layout-radio").change(function() {
@@ -249,13 +257,7 @@ jQuery(document).ready(function($) {
             /* enable all inputs with class layout-basic-show */
             $('.layout-basic-show').prop('disabled', false);
 
-            $('#sb_fluid_images').prop('checked', true);
-
-            if ($("#sb_fluid_images").is(":checked") == true) {
-                $('#columns_count').prop('disabled', true);
-            } else {
-                $('#columns_count').prop('disabled', false);
-            }
+            //$('#sb_fluid_images').prop('checked', true);
         }
 
         if ($("#layout-thumbnail").is(":checked") == true) {
@@ -265,7 +267,7 @@ jQuery(document).ready(function($) {
             /* enable all inputs with class layout-thumbnail-show */
             $('.layout-thumbnail-show').prop('disabled', false);
 
-            $('#sb_fluid_images').prop('checked', false);
+            //$('#sb_fluid_images').prop('checked', false);
         }
 
         if ($("#layout-dropcap").is(":checked") == true) {
@@ -275,7 +277,7 @@ jQuery(document).ready(function($) {
             /* enable all inputs with class layout-dropcap-show */
             $('.layout-dropcap-show').prop('disabled', false);
 
-            $('#sb_fluid_images').prop('checked', false);
+            //$('#sb_fluid_images').prop('checked', false);
         }
 
         if ($("#layout-grid-medium").is(":checked") == true) {
@@ -285,7 +287,7 @@ jQuery(document).ready(function($) {
             /* enable all inputs with class layout-basic-show */
             $('.layout-grid-show').prop('disabled', false);
 
-            $('#sb_fluid_images').prop('checked', false);
+            //$('#sb_fluid_images').prop('checked', false);
         }
 
     });

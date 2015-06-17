@@ -27,6 +27,11 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.7
+* Responsive Grid now fully responsive! You can set the width and the number of columns and the page will display all the column if the width of the container allows. Or you can set the number of columns and and posts will be placed over the entire width of the container automatically, their width will change depending on the width of the container.
+* In both variants of Responsive Grid on smartphones all posts displays in one column the entire width of the screen.
+* Added support for multiple columns in all layouts. Now in the layout can be from 1 to 12 columns, all as in the Bootstrap :)
+
 ## 0.6.6
 * Fixed issue with incorrect interaction with other posts, comments, plug-ins, etc., which displays the content on the same page, which is inserted a shortcode.
 

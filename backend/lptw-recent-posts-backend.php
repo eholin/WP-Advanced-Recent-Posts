@@ -95,6 +95,35 @@ function lptw_recent_posts_manage_shortcodes() {
                     Do not display Posts without Featured Image.</label>
                 </td>
             </tr>
+            <tr id="columns_and_width">
+                <th scope="row">Columns and width:</th>
+                <td>
+                    <div class="lptw-sb-row">
+                        <legend class="screen-reader-text"><span>Adaptive layout </span></legend>
+                        <label for="sb_columns"><input type="number" class="small-text layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-show" value="2" id="sb_columns" min="1" step="1" max="12" name="sb_columns">
+                        Number of columns.</label>
+                    </div>
+                    <div class="lptw-sb-row">
+                        Space beetween columns:&nbsp;&nbsp;&nbsp;
+                        <label for="sb_space_hor"><input type="number" class="small-text layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-show" value="10" id="sb_space_hor" min="1" step="1" name="sb_space_hor">
+                        Horizontal.</label>
+                        <label for="sb_space_ver"><input type="number" class="small-text layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-show" value="10" id="sb_space_ver" min="1" step="1" name="sb_space_ver">
+                        Vertical.</label>
+                    </div>
+                    <div class="lptw-sb-row">
+                        <label for="sb_fluid_images"><input type="checkbox" class="layout-basic-show layout-grid-show layout-thumbnail-hide layout-dropcap-hide" checked="checked" value="0" id="sb_fluid_images" name="sb_fluid_images">
+                        The width of the image adapts to the width of the container.</label>
+                    </div>
+                    <div class="lptw-sb-row">
+                        <label for="sb_width"><input type="number" class="small-text layout-basic-hide layout-grid-hide layout-thumbnail-show layout-dropcap-show" value="300" id="sb_width" min="1" step="1" name="sb_width" disabled="disabled">
+                        The width of the column in pixels, if not already selected adaptive layout.</label>
+                    </div>
+                    <div class="lptw-sb-row">
+                        <label for="sb_height"><input type="number" class="small-text layout-basic-hide layout-grid-show layout-thumbnail-hide layout-dropcap-hide" value="400" id="sb_height" min="1" step="1" name="sb_height" disabled="disabled">
+                        The fixed height of the cell in pixels, only for Responsive Grid. If not set - all cells have auto height.</label>
+                    </div>
+                </td>
+            </tr>
             <tr id="post_types">
                 <th scope="row"><label for="post_type">Post type:</label></th>
                 <td>
@@ -128,26 +157,6 @@ function lptw_recent_posts_manage_shortcodes() {
                     ?>
                     </select>
                     <p class="description">If none of the authors is selected - will be displayed the posts of all the authors.</p>
-                </td>
-            </tr>
-            <tr id="columns_and_width">
-                <th scope="row">Columns and width:</th>
-                <td>
-                    <div class="lptw-sb-row">
-                        <legend class="screen-reader-text"><span>Adaptive layout </span></legend>
-                        <label for="sb_fluid_images"><input type="checkbox" class="layout-basic-show layout-grid-hide layout-thumbnail-hide layout-dropcap-hide" checked="checked" value="0" id="sb_fluid_images" name="sb_fluid_images">
-                        The width of the image adapts to the width of the container.</label>
-                    </div>
-                    <div class="lptw-sb-row">
-                        <label for="sb_width"><input type="number" class="small-text layout-basic-hide layout-grid-hide layout-grid-hide layout-thumbnail-show layout-dropcap-show" value="300" id="sb_width" min="1" step="1" name="sb_width" disabled="disabled">
-                        The width of the column in pixels, if not already selected adaptive layout.</label>
-                    </div>
-                    <div class="lptw-sb-row">
-                        <fieldset class="layout-dropcap-show layout-basic-show layout-grid-hide layout-thumbnail-show" id="columns_count" disabled="disabled">
-                            <label for="sb_columns_1"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_1" value="1" checked="checked" />&nbsp;1 column</label>
-                            <label for="sb_columns_2"><input type="radio" class="columns-radio" name="sb_columns" id="sb_columns_2" value="2" />&nbsp;2 columns</label>
-                        </fieldset>
-                    </div>
                 </td>
             </tr>
             <tr>
@@ -187,9 +196,9 @@ function lptw_recent_posts_manage_shortcodes() {
                 <th scope="row"><label for="color_scheme">Color scheme:</label></th>
                 <td>
                     <select class="layout-basic-show layout-grid-show layout-thumbnail-hide layout-dropcap-hide" id="color_scheme" name="color_scheme">
-                        <option value="no-overlay" selected="selected">Without overlay</option>
+                        <option value="no-overlay">Without overlay</option>
                         <option value="light">Light</option>
-                    	<option value="dark">Dark</option>
+                    	<option value="dark" selected="selected">Dark</option>
                     </select>
                     <p class="description">Only for Basic layout.</p>
                 </td>

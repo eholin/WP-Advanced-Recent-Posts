@@ -1,9 +1,1 @@
-jQuery(document).ready(function($) {
-    var $container = $('#grid-container');
-
-    // initialize
-    $container.masonry({
-        gutter: 10,
-        itemSelector: '.lptw-grid-element'
-    });
-});
+/* The file is required for compatibility with older versions, not used now, but will be used in the future. */

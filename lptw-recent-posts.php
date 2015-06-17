@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.6
+Version: 0.6.7
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -16,7 +16,7 @@ function lptw_recent_posts_register_scripts() {
 	wp_register_style( 'lptw-style', plugins_url( 'lptw-recent-posts.css', __FILE__ ) );
 	wp_enqueue_style( 'lptw-style' );
 
-    wp_enqueue_script( 'lptw-recent-posts-script', plugins_url( 'lptw-recent-posts.js', __FILE__ ), array('jquery', 'jquery-masonry'), '0.5', true );
+    wp_enqueue_script( 'lptw-recent-posts-script', plugins_url( 'lptw-recent-posts.js', __FILE__ ), array('jquery', 'jquery-masonry'), false, true );
 }
 add_action( 'wp_enqueue_scripts', 'lptw_recent_posts_register_scripts' );
 
@@ -968,24 +968,13 @@ function lptw_display_recent_posts ( $atts ) {
         'reverse_post_order'        => 'false',
         'background_color'          => '#4CAF50',
         'text_color'                => '#ffffff',
-        'no_thumbnails'             => 'hide'
+        'no_thumbnails'             => 'hide',
+        'space_hor'                 => 10,
+        'space_ver'                 => 10
     ), $atts );
-
-    if ($a['width'] != '' || $a['height'] != '') {
-        $dim_style = 'style="';
-        if ($a['width'] != '')  {$dim_style .= 'width:'.$a['width'].'px;';}
-        if ($a['height'] != '') {$dim_style .= 'height:'.$a['height'].'px;';}
-        $dim_style .= '"';
-    }
 
     if ($a['no_thumbnails'] == 'hide') { $meta_key = '_thumbnail_id'; }
     else { $meta_key = ''; }
-
-    if ($a['fluid_images'] == 'true') { $dim_style = 'style="width:100%;"'; }
-
-    if ($a['columns'] < 1) {$a['columns'] = 1;}
-    elseif ($a['columns'] > 2) {$a['columns'] = 2;}
-    $column_style = 'columns-'.$a['columns'];
 
     if (!empty($a['exclude_posts'])) {
         $exclude_post = explode(',', $a['exclude_posts']);
@@ -1032,11 +1021,38 @@ function lptw_display_recent_posts ( $atts ) {
     $lptw_shortcode_query = new WP_Query( $lptw_shortcode_query_args );
     if( $lptw_shortcode_query->have_posts() ) {
         if ($a['reverse_post_order'] == 'true') { $lptw_shortcode_query->posts = array_reverse($lptw_shortcode_query->posts); }
-        $i=0;
+        $i=1;
         $content = '';
-        if ($a['layout'] == 'grid-medium') {$content .= '<div id="grid-container">';}
+        switch ($a['layout']) {
+            case 'basic':
+                $content .= '<div id="basic-container">';
+            break;
+            case 'thumbnail':
+                $content .= '<div id="thumbnail-container">';
+            break;
+            case 'dropcap':
+                $content .= '<div id="dropcap-container">';
+            break;
+            case 'grid-medium':
+                $content .= '<div id="grid-container">';
+            break;
+        }
         while( $lptw_shortcode_query->have_posts() ) {
             $lptw_shortcode_query->the_post();
+
+            if ($a['width'] != '' || $a['height'] != '') {
+                $element_style = 'style="';
+                if ($a['width'] != '')  {$element_style .= 'width:'.$a['width'].'px; ';}
+                if ($a['height'] != '') {$element_style .= 'height:'.$a['height'].'px; ';}
+            }
+
+            if ($a['fluid_images'] == 'true') {
+                $element_style = '';
+                $column_style = 'columns-'.$a['columns'];
+                }
+            else {
+                $column_style = 'columns-fixed';
+            }
 
             $post_id = get_the_ID();
 
@@ -1060,15 +1076,24 @@ function lptw_display_recent_posts ( $atts ) {
                 }
             }
 
+            if ($element_style == '') {$element_style = 'style="';}
+
             if ($a['columns'] > 1) {
-                if (($i % 2) == 1) {$cell_style = 'last-cell';}
-                else {$cell_style = 'inner-cell';}
-            } else {$cell_style = 'last-cell';}
+                if (($i % $a['columns']) == 0) {
+                    $element_style .= 'padding-bottom: '.$a['space_ver'].'px;';
+                }
+                elseif (($i % $a['columns']) == 1 && $a['fluid_images'] != 'true') {
+                    $element_style .= 'padding-right: '.$a['space_hor'].'px; padding-bottom: '.$a['space_ver'].'px; clear: left;';
+                }
+                else { $element_style .= 'padding-right: '.$a['space_hor'].'px; padding-bottom: '.$a['space_ver'].'px;'; }
+            } else { $element_style .= 'padding-bottom: '.$a['space_ver'].'px'; }
+
+            $element_style .= '"';
 
             /* start layouts output */
             /* basic layout - one or tho columns, fixed or adaptive width */
             if ($a['layout'] == 'basic' ) {
-                $content .= '<article class="basic-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'><header>';
+                $content .= '<article class="basic-layout '.$column_style.' '.$cell_style.'" '.$element_style.'><header>';
                 if ($url != '') {$content .= '<a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>';}
                 else {
                     $content .= '<a href="'.get_the_permalink().'" class="lptw-thumbnail-noimglink"><div class="user-overlay" style="background-color: '.$a['background_color'].';"></div>';
@@ -1091,7 +1116,7 @@ function lptw_display_recent_posts ( $atts ) {
             /* small thumbnails */
             } elseif ($a['layout'] == 'thumbnail' ) {
                 $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), array ( 100,100 ) );
-                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>';
+                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$element_style.'>';
                 $title = get_the_title();
                 if ($thumb_100 == '') {
                     $first_letter = substr($title, 0, 1);
@@ -1112,11 +1137,11 @@ function lptw_display_recent_posts ( $atts ) {
                 $content .= '</article>';
 
             /* recent posts without thumbnails, with date as drop cap */
-            } elseif ($a['layout'] == 'dropcap' ) {
+            } elseif ( $a['layout'] == 'dropcap' ) {
                 $post_date = get_the_date('M.Y');
                 $post_day = get_the_date('d');
 
-                $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.$dim_style.'>
+                $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.$element_style.'>
                 <header>
                     <div class="lptw-dropcap-date" style="background-color: '.$a['background_color'].'">
                         <span class="lptw-dropcap-day" style="color: '.$a['text_color'].'">'.$post_day.'</span>
@@ -1128,15 +1153,27 @@ function lptw_display_recent_posts ( $atts ) {
 
             /* recent posts with thumbnail and featured posts */
             } elseif ($a['layout'] == 'grid-medium' ) {
+                if ($a['fluid_images'] == 'true') {
+                    $base_width = (100 / $a['columns']) - 1;
+                    $normal_width = number_format($base_width, 2, '.', '') . '%';
+                    $featured_width = number_format(($base_width * 2) + 1, 2, '.', '') . '%';
+                } else {
+                    $normal_width = $a['width'] . 'px';
+                    $featured_width = ($a['width'] * 2) + $a['space_hor'] . 'px';
+                }
+
+                $fixed_height = '';
+                if ( $a['height'] > 0 ) { $fixed_height = 'height:'.$a['height'].'px; '; }
+
                 $featured = get_post_meta ($post_id, 'featured_post', true);
                 if ($featured == 'on') {
                     $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'lptw-grid-large' );
                     $url_grid = $thumb_grid['0'];
 
                     $content .= '
-                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element w3">
+                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element lptw-featured" style="background: url('.$url_grid.') center center no-repeat; background-size: cover;' . $fixed_height . 'width: ' . $featured_width . '; margin-bottom: ' . $a['space_ver'] . 'px;">
                         <header>
-                            <a href="'.get_the_permalink().'" class="lptw-post-grid-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url_grid.'" alt="'.get_the_title().'" /></div>
+                            <a href="'.get_the_permalink().'" class="lptw-post-grid-link"><div class="overlay overlay-'.$a['color_scheme'].'"></div>
                             <div class="lptw-post-header">';
                     if ( $a['show_date_before_title'] == 'true' ) {
                     	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
@@ -1151,11 +1188,11 @@ function lptw_display_recent_posts ( $atts ) {
                     $content .= '</article>';
                 }
                 else {
-                    $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'medium' );
+                    $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'large' );
                     $url_grid = $thumb_grid['0'];
 
                     $content .= '
-                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element grid-element-'.$a['color_scheme'].'">
+                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element grid-element-'.$a['color_scheme'].'" style="width: ' . $normal_width . '; margin-bottom: ' . $a['space_ver'] . 'px;">
                         <header>
                             <a href="'.get_the_permalink().'" class="lptw-post-grid-img"><img src="'.$url_grid.'" alt="'.get_the_title().'" /></a>
                             <div class="lptw-post-header">';
@@ -1181,7 +1218,67 @@ function lptw_display_recent_posts ( $atts ) {
 
             $i++;
         } // end while( $lptw_shortcode_query->have_posts() )
-        if ($a['layout'] == 'grid-medium') {$content .= '</div>';}
+        $content .= '</div>';
+        if ($a['layout'] == 'grid-medium') {
+            $content .= '<script>
+                            jQuery(document).ready(function($) {
+                              var $container = $("#grid-container");
+                              var fluid_images = '.$a['fluid_images'].';
+
+                              // initialize
+                              $container.masonry({
+                                  itemSelector: ".lptw-grid-element",';
+                $content .= '     columnWidth: function(containerWidth) {
+                                        var countedColumnWidth;
+                                        if (containerWidth < 641) {
+                                            $(".lptw-grid-element").css("width", "100%");
+                                            countedColumnWidth = containerWidth - 1;
+                                        } else if (containerWidth > 640) {
+                                            $(".lptw-grid-element").css("width", "'.$normal_width.'");
+                                            $(".lptw-featured").css("width", "'.$featured_width.'");
+                                            if (fluid_images === true) {
+                                        	    countedColumnWidth = (containerWidth / ' . $a['columns'] . ') - 1
+                                            } else {
+                                        	    countedColumnWidth = ' . $a['width'] . ' - 1
+                                            }
+
+                                        }
+                                        return countedColumnWidth;
+                                  },';
+            $content .= '         gutter: ' . $a['space_hor'];
+            $content .= '     });
+
+                                $(window).resize(function() {
+                                	var $container = $("#grid-container");
+                                	var viewport = $(window).width();
+                                    var fluid_images = '.$a['fluid_images'].';
+
+                                	if (viewport < 641) {
+                                        $(".lptw-grid-element").css("width", "100%");
+                                		$container.masonry("option", {
+                                			columnWidth: viewport
+                                		});
+                                	} else if (viewport > 640) {
+                                        var containerWidth = $container.width();
+                                        $(".lptw-grid-element").css("width", "'.$normal_width.'");
+                                        $(".lptw-featured").css("width", "'.$featured_width.'");
+
+                                        if (fluid_images === true) {
+                                    		$container.masonry("option", {
+                                    			columnWidth: (containerWidth / ' . $a['columns'] . ') - 1
+                                    		});
+                                        } else {
+                                    		$container.masonry("option", {
+                                    			columnWidth: ' . $a['width'] . ' - 1
+                                    		});
+                                        }
+                                    }
+                                });
+
+                            });
+
+                        </script>';
+            }
     } else {
         $content = __( 'No recent posts', 'lptw_recent_posts_domain' );
     }
