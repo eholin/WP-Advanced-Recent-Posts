@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.7
+Version: 0.6.8
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -1224,16 +1224,18 @@ function lptw_display_recent_posts ( $atts ) {
                             jQuery(document).ready(function($) {
                               var $container = $("#grid-container");
                               var fluid_images = '.$a['fluid_images'].';
+                              var countedColumnWidth;
 
                               // initialize
                               $container.masonry({
                                   itemSelector: ".lptw-grid-element",';
+                if ($a['fluid_images'] != 'true') {$content .= 'gutter: ' . $a['space_hor'].',';}
                 $content .= '     columnWidth: function(containerWidth) {
-                                        var countedColumnWidth;
                                         if (containerWidth < 641) {
                                             $(".lptw-grid-element").css("width", "100%");
                                             countedColumnWidth = containerWidth - 1;
                                         } else if (containerWidth > 640) {
+                                            console.log(containerWidth);
                                             $(".lptw-grid-element").css("width", "'.$normal_width.'");
                                             $(".lptw-featured").css("width", "'.$featured_width.'");
                                             if (fluid_images === true) {
@@ -1241,11 +1243,9 @@ function lptw_display_recent_posts ( $atts ) {
                                             } else {
                                         	    countedColumnWidth = ' . $a['width'] . ' - 1
                                             }
-
                                         }
                                         return countedColumnWidth;
-                                  },';
-            $content .= '         gutter: ' . $a['space_hor'];
+                                  }';
             $content .= '     });
 
                                 $(window).resize(function() {
@@ -1256,7 +1256,7 @@ function lptw_display_recent_posts ( $atts ) {
                                 	if (viewport < 641) {
                                         $(".lptw-grid-element").css("width", "100%");
                                 		$container.masonry("option", {
-                                			columnWidth: viewport
+                                			columnWidth: viewport - 1
                                 		});
                                 	} else if (viewport > 640) {
                                         var containerWidth = $container.width();

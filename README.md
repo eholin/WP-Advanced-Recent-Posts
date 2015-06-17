@@ -27,6 +27,9 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.8
+* Fixed issue with incorrect columns size in Responsive Grid
+
 ## 0.6.7
 * Responsive Grid now fully responsive! You can set the width and the number of columns and the page will display all the column if the width of the container allows. Or you can set the number of columns and and posts will be placed over the entire width of the container automatically, their width will change depending on the width of the container.
 * In both variants of Responsive Grid on smartphones all posts displays in one column the entire width of the screen.
