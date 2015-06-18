@@ -936,6 +936,19 @@ function lptw_recent_posts_load_widget() {
 }
 add_action( 'widgets_init', 'lptw_recent_posts_load_widget' );
 
+function lptw_create_element_style ($style_args) {
+    if ( is_array($style_args) ) {
+        $element_style = 'style = "';
+        foreach ( $style_args as $argument ) {
+            $element_style .= $argument . ' ';
+        }
+        $element_style .= '"';
+        return $element_style;
+    } else {
+        return;
+    }
+}
+
 
 /**
 -------------------------------------- Shortcode --------------------------------------
@@ -1040,28 +1053,23 @@ function lptw_display_recent_posts ( $atts ) {
         while( $lptw_shortcode_query->have_posts() ) {
             $lptw_shortcode_query->the_post();
 
-            if ($a['width'] != '' || $a['height'] != '') {
-                $element_style = 'style="';
-                if ($a['width'] != '')  {$element_style .= 'width:'.$a['width'].'px; ';}
-                if ($a['height'] != '') {$element_style .= 'height:'.$a['height'].'px; ';}
-            }
+            $element_style_args = Array();
+            if ($a['width'] != '' && $a['fluid_images'] != 'true')  {$element_style_args[] = 'width:'.$a['width'].'px;';}
+            if ($a['height'] != '' && $a['fluid_images'] != 'true') {$element_style_args[] = 'height:'.$a['height'].'px;';}
 
             if ($a['fluid_images'] == 'true') {
-                $element_style = '';
-                $column_style = 'columns-'.$a['columns'];
+                $column_style = 'lptw-columns-'.$a['columns'];
                 }
             else {
-                $column_style = 'columns-fixed';
+                $column_style = 'lptw-columns-fixed';
             }
 
             $post_id = get_the_ID();
 
             $post_date = get_the_date($a['date_format']);
             $post_time = get_the_date($a['time_format']);
-            if ($a['show_time'] == 'true') {
-                if ($a['show_time_before'] == 'true') { $post_date_time = $post_time . ' ' . $post_date; }
-                else { $post_date_time = $post_date . ' ' . $post_time; }
-            }
+            if ($a['show_time'] == 'true' && $a['show_time_before'] == 'true') { $post_date_time = $post_time . ' ' . $post_date; }
+            else if ( $a['show_time'] == 'true' && $a['show_time_before'] != 'true' ) { $post_date_time = $post_date . ' ' . $post_time; }
             else { $post_date_time = $post_date; }
 
 
@@ -1076,24 +1084,26 @@ function lptw_display_recent_posts ( $atts ) {
                 }
             }
 
-            if ($element_style == '') {$element_style = 'style="';}
-
-            if ($a['columns'] > 1) {
+            if ( $a['columns'] > 1 && $a['layout'] != 'grid-medium' ) {
                 if (($i % $a['columns']) == 0) {
-                    $element_style .= 'padding-bottom: '.$a['space_ver'].'px;';
+                    $element_style_args[] = 'padding-bottom: '.$a['space_ver'].'px;';
                 }
                 elseif (($i % $a['columns']) == 1 && $a['fluid_images'] != 'true') {
-                    $element_style .= 'padding-right: '.$a['space_hor'].'px; padding-bottom: '.$a['space_ver'].'px; clear: left;';
+                    $element_style_args[] = 'padding-right: '.$a['space_hor'].'px;';
+                    $element_style_args[] = 'padding-bottom: '.$a['space_ver'].'px;';
+                    $element_style_args[] = 'clear: left;';
                 }
-                else { $element_style .= 'padding-right: '.$a['space_hor'].'px; padding-bottom: '.$a['space_ver'].'px;'; }
-            } else { $element_style .= 'padding-bottom: '.$a['space_ver'].'px'; }
-
-            $element_style .= '"';
+                else {
+                    $element_style_args[] = 'padding-right: '.$a['space_hor'].'px;';
+                    $element_style_args[] = 'padding-bottom: '.$a['space_ver'].'px;';
+                }
+            } else if ( $a['columns'] == 1 && $a['layout'] != 'grid-medium' ) { $element_style_args[] = 'padding-bottom: '.$a['space_ver'].'px;'; }
+            else { $element_style_args[] = 'margin-bottom: '.$a['space_ver'].'px;'; }
 
             /* start layouts output */
             /* basic layout - one or tho columns, fixed or adaptive width */
             if ($a['layout'] == 'basic' ) {
-                $content .= '<article class="basic-layout '.$column_style.' '.$cell_style.'" '.$element_style.'><header>';
+                $content .= '<article class="basic-layout '.$column_style.' '.$cell_style.'" '.lptw_create_element_style($element_style_args).'><header>';
                 if ($url != '') {$content .= '<a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>';}
                 else {
                     $content .= '<a href="'.get_the_permalink().'" class="lptw-thumbnail-noimglink"><div class="user-overlay" style="background-color: '.$a['background_color'].';"></div>';
@@ -1116,7 +1126,7 @@ function lptw_display_recent_posts ( $atts ) {
             /* small thumbnails */
             } elseif ($a['layout'] == 'thumbnail' ) {
                 $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), array ( 100,100 ) );
-                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.$element_style.'>';
+                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.lptw_create_element_style($element_style_args).'>';
                 $title = get_the_title();
                 if ($thumb_100 == '') {
                     $first_letter = substr($title, 0, 1);
@@ -1141,7 +1151,7 @@ function lptw_display_recent_posts ( $atts ) {
                 $post_date = get_the_date('M.Y');
                 $post_day = get_the_date('d');
 
-                $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.$element_style.'>
+                $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.lptw_create_element_style($element_style_args).'>
                 <header>
                     <div class="lptw-dropcap-date" style="background-color: '.$a['background_color'].'">
                         <span class="lptw-dropcap-day" style="color: '.$a['text_color'].'">'.$post_day.'</span>
@@ -1162,16 +1172,19 @@ function lptw_display_recent_posts ( $atts ) {
                     $featured_width = ($a['width'] * 2) + $a['space_hor'] . 'px';
                 }
 
-                $fixed_height = '';
-                if ( $a['height'] > 0 ) { $fixed_height = 'height:'.$a['height'].'px; '; }
+                if ( $a['height'] > 0 ) { $element_style_args[] = 'height: '.$a['height'].'px;'; }
 
                 $featured = get_post_meta ($post_id, 'featured_post', true);
                 if ($featured == 'on') {
                     $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'lptw-grid-large' );
                     $url_grid = $thumb_grid['0'];
 
+                    $element_style_args[] = 'width: ' . $featured_width . ';';
+                    $element_style_args[] = 'background: url('.$url_grid.') center center no-repeat;';
+                    $element_style_args[] = 'background-size: cover;';
+
                     $content .= '
-                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element lptw-featured" style="background: url('.$url_grid.') center center no-repeat; background-size: cover;' . $fixed_height . 'width: ' . $featured_width . '; margin-bottom: ' . $a['space_ver'] . 'px;">
+                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element lptw-featured" '.lptw_create_element_style($element_style_args).'>
                         <header>
                             <a href="'.get_the_permalink().'" class="lptw-post-grid-link"><div class="overlay overlay-'.$a['color_scheme'].'"></div>
                             <div class="lptw-post-header">';
@@ -1191,8 +1204,10 @@ function lptw_display_recent_posts ( $atts ) {
                     $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'large' );
                     $url_grid = $thumb_grid['0'];
 
+                    $element_style_args[] = 'width: ' . $normal_width . ';';
+
                     $content .= '
-                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element grid-element-'.$a['color_scheme'].'" style="width: ' . $normal_width . '; margin-bottom: ' . $a['space_ver'] . 'px;">
+                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element grid-element-'.$a['color_scheme'].'" '.lptw_create_element_style($element_style_args).'>
                         <header>
                             <a href="'.get_the_permalink().'" class="lptw-post-grid-img"><img src="'.$url_grid.'" alt="'.get_the_title().'" /></a>
                             <div class="lptw-post-header">';

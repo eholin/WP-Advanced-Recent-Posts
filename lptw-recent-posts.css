@@ -1,4 +1,4 @@
-/*-------------------------------------------------------------->>> TABLE OF CONTENTS:----------------------------------------------------------------1 Common styles2 Widgets styles	2.1 Fluid images widget	2.2 Small thumbnails widget3 Shortcodes styles	3.1 Basic layout	3.2 Thumbnail layout	3.3 Drop cap layout    3.4 Grid layout--------------------------------------------------------------*/
+/* version 0.6.9 *//*-------------------------------------------------------------->>> TABLE OF CONTENTS:----------------------------------------------------------------1 Common styles2 Widgets styles	2.1 Fluid images widget	2.2 Small thumbnails widget3 Shortcodes styles	3.1 Basic layout	3.2 Thumbnail layout	3.3 Drop cap layout    3.4 Grid layout--------------------------------------------------------------*/
 
 
 /** * 1/* -------------------------- start common styles -------------------------- */
@@ -178,7 +178,7 @@ ul.lptw-recent-posts-thumbnails-widget {
 
 /** * 3 * -------------------------- start shortcodes styles -------------------------- */
 
-.columns-fixed {
+.lptw-columns-fixed {
   float: left;
   position: relative;
   min-height: 1px;
@@ -186,57 +186,49 @@ ul.lptw-recent-posts-thumbnails-widget {
   box-sizing: border-box;
 }
 
-.columns-1, .columns-2, .columns-3, .columns-4, .columns-5, .columns-6, .columns-7, .columns-8, .columns-9, .columns-10, .columns-11, .columns-12 {
+.lptw-columns-1, .lptw-columns-2, .lptw-columns-3, .lptw-columns-4, .lptw-columns-5, .lptw-columns-6, .lptw-columns-7, .columns-8, .lptw-columns-9, .lptw-columns-10, .lptw-columns-11, .lptw-columns-12 {
   float: left;
   position: relative;
   min-height: 1px;
   margin: 0;
   box-sizing: border-box;
 }
-.columns-1 {
+.lptw-columns-1 {
   width: 100%;
 }
-.columns-2 {
+.lptw-columns-2 {
   width: 50%;
 }
-.columns-3 {
+.lptw-columns-3 {
   width: 33.33333333%;
 }
-.columns-4 {
+.lptw-columns-4 {
   width: 25%;
 }
-.columns-5 {
+.lptw-columns-5 {
   width: 20%;
 }
-.columns-6 {
+.lptw-columns-6 {
   width: 16.66666667%;
 }
-.columns-7 {
+.lptw-columns-7 {
   width: 14.28571429%;
 }
-.columns-8 {
+.lptw-columns-8 {
   width: 12.5%;
 }
-.columns-9 {
+.lptw-columns-9 {
   width: 11.11111111%;
 }
-.columns-10 {
+.lptw-columns-10 {
   width: 10%;
 }
-.columns-11 {
+.lptw-columns-11 {
   width: 9.09090909%;
 }
-.columns-12 {
+.lptw-columns-12 {
   width: 8.33333333%;
 }
-/*
-.inner-cell {
-  margin: 0 2em 2em 0;
-}
-.last-cell {
-  margin: 0 0 2em 0;
-}
-*/
 
 /** * 3.1 * -------------------------- BASIC LAYOUT -------------------------- */
 
