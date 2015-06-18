@@ -27,7 +27,7 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
-# 0.6.9 developer release
+## 0.6.9 developer release
 * Fixed issue with compatibility with Woocommerce (when columns has the same styles names)
 * Refactored the formation of the element style for all layouts
 
