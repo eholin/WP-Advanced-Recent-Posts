@@ -409,7 +409,7 @@ ul.lptw-recent-posts-thumbnails-widget {
 }
 .grid-layout .post-excerpt {
   display: block;
-  padding: 0 1rem;
+  padding: 0 1rem 1rem 1rem;
   font-size: 0.75em;
 }
 .lptw-grid-element {

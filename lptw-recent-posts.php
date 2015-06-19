@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.8
+Version: 0.6.9
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -983,7 +983,9 @@ function lptw_display_recent_posts ( $atts ) {
         'text_color'                => '#ffffff',
         'no_thumbnails'             => 'hide',
         'space_hor'                 => 10,
-        'space_ver'                 => 10
+        'space_ver'                 => 10,
+        'tags_id'                   => '',
+        'tags_exclude'              => 'false'
     ), $atts );
 
     if ($a['no_thumbnails'] == 'hide') { $meta_key = '_thumbnail_id'; }
@@ -1016,6 +1018,15 @@ function lptw_display_recent_posts ( $atts ) {
         $post_category = '';
     }
 
+    if ( strpos($a['tags_id'], ',') !== false ) {
+        $post_tags = array_map('intval', explode(',', $a['tags_id']));
+    } else { $post_tags = (integer) $a['tags_id']; }
+
+    if ( $a['post_type'] != 'post' ) { $post_tags = ''; }
+
+    if ( $a['tags_exclude'] == 'true' ) { $tags_type = 'tag__not_in'; }
+    else { $tags_type = 'tag__in'; }
+
     $lptw_shortcode_query_args = array(
         'post_type'             => $a['post_type'],
         'posts_per_page'        => $a['posts_per_page'],
@@ -1025,6 +1036,7 @@ function lptw_display_recent_posts ( $atts ) {
         'post__not_in'          => $exclude_post,
         'author__in'            => $authors_id,
         'category__in'          => $post_category,
+        $tags_type              => $post_tags,
         'tax_query'             => $tax_query,
         'order'                 => 'DESC',
         'orderby'               => 'date',
@@ -1270,6 +1282,7 @@ function lptw_display_recent_posts ( $atts ) {
 
                                 	if (viewport < 641) {
                                         $(".lptw-grid-element").css("width", "100%");
+                                        $(".lptw-grid-element").css("height", "auto");
                                 		$container.masonry("option", {
                                 			columnWidth: viewport - 1
                                 		});
@@ -1283,6 +1296,7 @@ function lptw_display_recent_posts ( $atts ) {
                                     			columnWidth: (containerWidth / ' . $a['columns'] . ') - 1
                                     		});
                                         } else {
+                                            $(".lptw-featured").css("height", "'.$a['height'].'");
                                     		$container.masonry("option", {
                                     			columnWidth: ' . $a['width'] . ' - 1
                                     		});
@@ -1312,19 +1326,23 @@ function lptw_register_recent_posts_menu_page(){
 add_action( 'admin_menu', 'lptw_register_recent_posts_menu_page' );
 
 function lptw_recent_posts_backend_scripts() {
-	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
-	wp_enqueue_style('lptw-recent-posts-backend-style' );
+    $screen = get_current_screen();
+    $post_type = $screen->id;
+    if ( strpos($post_type, 'page_recent_posts') !== false ) {
+    	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
+    	wp_enqueue_style('lptw-recent-posts-backend-style' );
 
-    // Add the color picker css styles
-    wp_enqueue_style( 'wp-color-picker' );
+        // Add the color picker css styles
+        wp_enqueue_style( 'wp-color-picker' );
 
-    wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'backend/lptw-recent-posts-shortcode-builder.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
+        wp_enqueue_script( 'lptw-shortcode-builder-script', plugins_url ( 'backend/lptw-recent-posts-shortcode-builder.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 
-    /* chosen css & js files */
-	wp_register_style('chosen-style', plugins_url( 'backend/chosen/chosen.min.css', __FILE__ ) );
-	wp_enqueue_style('chosen-style' );
+        /* chosen css & js files */
+    	wp_register_style('chosen-style', plugins_url( 'backend/chosen/chosen.min.css', __FILE__ ) );
+    	wp_enqueue_style('chosen-style' );
 
-    wp_enqueue_script( 'chosen-script', plugins_url ( 'backend/chosen/chosen.jquery.min.js', __FILE__ ), array(), '1.4.2', true );
+        wp_enqueue_script( 'chosen-script', plugins_url ( 'backend/chosen/chosen.jquery.min.js', __FILE__ ), array(), '1.4.2', true );
+    }
 }
 add_action( 'admin_enqueue_scripts', 'lptw_recent_posts_backend_scripts' );
 

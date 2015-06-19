@@ -62,7 +62,6 @@ function get_terms_list_callback() {
 
 function lptw_recent_posts_manage_shortcodes() {
     $default_posts_per_page = intval(get_option('posts_per_page', '10'));
-
 ?>
     <div class="wrap">
     <h2>Advanced Recent Posts Shortcode Builder</h2>
@@ -137,7 +136,7 @@ function lptw_recent_posts_manage_shortcodes() {
                     </select>
                 </td>
             </tr>
-            <tr id="post_types">
+            <tr id="post_authors">
                 <th scope="row"><label for="authors">Authors:</label></th>
                 <td>
                     <?php
@@ -156,7 +155,28 @@ function lptw_recent_posts_manage_shortcodes() {
                     	}
                     ?>
                     </select>
-                    <p class="description">If none of the authors is selected - will be displayed the posts of all the authors.</p>
+                    <p class="description">If none of authors is selected - will be displayed posts of all authors.</p>
+                </td>
+            </tr>
+            <tr id="post_tags">
+                <th scope="row"><label for="tags">Tags:</label><p class="description">Now only work with posts.</p></th>
+                <td>
+                    <?php
+                        $posts_tags = get_tags();
+                    ?>
+                    <select id="tags" name="tags" multiple class="chosen-select" data-placeholder="Select one or more post tag">
+                    <?php
+
+                    	foreach ($posts_tags as $post_tag) {
+                    	    echo '<option value="' . $post_tag->term_id . '">' . $post_tag->name . '</option>';
+                    	}
+                    ?>
+                    </select>
+                    <p class="description">If none of tags is selected - will be displayed posts with tags and without tags.</p>
+                    <p>
+                        <label for="tags_exclude"><input type="checkbox" value="0" id="tags_exclude" name="tags_exclude">
+                        Exclude posts with this tags from the posts list.</label>
+                    </p>
                 </td>
             </tr>
             <tr>

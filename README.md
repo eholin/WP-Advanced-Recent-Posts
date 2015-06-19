@@ -27,6 +27,10 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.9
+* Added the ability to filter the posts by tags (only in a shortcode, in widgets this ability will be available in the next version). You can include or exclude post by a specific tag or multiple tags. Now only work with posts.
+* Fixed issue with fixed height of a element in mobile version of the Responsive Grid layout.
+
 ## 0.6.9 developer release
 * Fixed issue with compatibility with Woocommerce (when columns has the same styles names)
 * Refactored the formation of the element style for all layouts
