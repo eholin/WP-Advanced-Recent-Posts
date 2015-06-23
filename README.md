@@ -12,12 +12,10 @@ Also you can Feature some posts - they will be show in the grid increased.
 See [live demo](http://demo.lp-tricks.com/recent-posts/responsive-grid-dark/) of the new layout!
 
 Advanced Recent Posts plugin shows the recent posts with thumbnails in two areas:
-
 * widget in your sidebar
 * shortcode in any place of your post or theme.
 
 Customization of the plugin is wery simple an flexible:
-
 * Widgets are configured into Dashboard -> Appearance -> Widgets
 * Shortcodes are configured in plugin shortcode builder, you will see it in the admin menu of your WordPress
 
@@ -26,6 +24,16 @@ There are two predefined color schemes (for Basic and Grid layout): dark and lig
 Better to see once than read a hundred times - see the [live demo](http://demo.lp-tricks.com/) on my website :)
 
 # Changelog
+
+## 0.6.10
+* Added sorting of the posts by the following parameters:
+  * Title
+  * Name (post slug)
+  * Date created
+  * Date modified
+  * Random
+  * Number of comments
+* Fixed issue with incorrect arrange of elements in the Basic Layout
 
 ## 0.6.9
 * Added the ability to filter the posts by tags (only in a shortcode, in widgets this ability will be available in the next version). You can include or exclude post by a specific tag or multiple tags. Now only work with posts.

@@ -191,14 +191,36 @@ function lptw_recent_posts_manage_shortcodes() {
                 </td>
             </tr>
             <tr>
-                <th scope="row"><label for="posts_per_page">Posts per page:</label></th>
+                <th scope="row"><label for="sorting">Sort & order posts:</label></th>
                 <td>
-                    <input type="number" class="small-text" value="<?php echo $default_posts_per_page;?>" id="posts_per_page" min="1" step="1" name="posts_per_page">
-                    <p class="description">Only for shortcode, not global!</p>
-                    <p>
-                        <label for="reverse_post_order"><input type="checkbox" value="0" id="reverse_post_order" name="reverse_post_order">
-                        Reverse post order: display the latest post last in the list. By default the latest post displays first.</label>
-                    </p>
+                    <fieldset id="sorting">
+                        <label for="orderby">Sort posts by:&nbsp;
+                        <select class="layout-basic-show layout-dropcap-show layout-grid-show layout-thumbnail-show" id="orderby" name="orderby">
+                            <option value="none">None</option>
+                            <option value="title">Title</option>
+                        	<option value="name">Name (post slug)</option>
+                        	<option value="date" selected="selected">Date created</option>
+                        	<option value="modified">Date modified</option>
+                        	<option value="rand">Random</option>
+                        	<option value="comment_count">Number of comments</option>
+                        </select>
+                        </label>&nbsp; &nbsp;
+                        <label for="orderby">Order:&nbsp;
+                        <select class="layout-basic-show layout-dropcap-show layout-grid-show layout-thumbnail-show" id="order" name="order">
+                        	<option value="ASC">Ascending order from lowest to highest values</option>
+                        	<option value="DESC" selected="selected">Descending order from highest to lowest values</option>
+                        </select>
+                        </label>
+                        <p>
+                            <label for="posts_per_page"><input type="number" class="small-text" value="<?php echo $default_posts_per_page;?>" id="posts_per_page" min="1" step="1" name="posts_per_page">
+                            Posts per page.</label>
+                        </p>
+                        <p class="description">Only for shortcode, not global!</p>
+                        <p>
+                            <label for="reverse_post_order"><input type="checkbox" value="0" id="reverse_post_order" name="reverse_post_order">
+                            Reverse post order: display the latest post last in the list. By default the latest post displays first.</label>
+                        </p>
+                    </fieldset>
                 </td>
             </tr>
             <tr>

@@ -111,7 +111,11 @@ jQuery(document).ready(function($) {
 
 		var sb_columns = $('#sb_columns').val();
 
-		var sb_posts_per_page = $("#posts_per_page").val();
+		var sb_order = $("#order").val();
+        
+        var sb_orderby = $("#orderby").val();
+        
+        var sb_posts_per_page = $("#posts_per_page").val();
 
 		if ($("#reverse_post_order").is(":checked") == true) {
 			var sb_reverse_post_order = "true";
@@ -224,6 +228,12 @@ jQuery(document).ready(function($) {
 		}
 		if (sb_columns != '') {
 			shortcode += ' columns="' + sb_columns + '"';
+		}
+		if (sb_order != '') {
+			shortcode += ' order="' + sb_order + '"';
+		}
+		if (sb_orderby != '') {
+			shortcode += ' orderby="' + sb_orderby + '"';
 		}
 		if (sb_posts_per_page != '') {
 			shortcode += ' posts_per_page="' + sb_posts_per_page + '"';

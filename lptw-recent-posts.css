@@ -1,7 +1,22 @@
-/* version 0.6.9 *//*-------------------------------------------------------------->>> TABLE OF CONTENTS:----------------------------------------------------------------1 Common styles2 Widgets styles	2.1 Fluid images widget	2.2 Small thumbnails widget3 Shortcodes styles	3.1 Basic layout	3.2 Thumbnail layout	3.3 Drop cap layout    3.4 Grid layout--------------------------------------------------------------*/
+/* version 0.6.10 */
+/*--------------------------------------------------------------
+>>> TABLE OF CONTENTS:
+----------------------------------------------------------------
+1 Common styles
+2 Widgets styles
+	2.1 Fluid images widget
+	2.2 Small thumbnails widget
+3 Shortcodes styles
+	3.1 Basic layout
+	3.2 Thumbnail layout
+	3.3 Drop cap layout
+    3.4 Grid layout
+--------------------------------------------------------------*/
 
 
-/** * 1/* -------------------------- start common styles -------------------------- */
+/**
+ * 1
+/* -------------------------- start common styles -------------------------- */
 
 .overlay-no-overlay::before {
   content: "";
@@ -53,10 +68,14 @@
   /* IE6-9 */
 }
 
-/** * 2/* -------------------------- start widgets styles -------------------------- */
+/**
+ * 2
+/* -------------------------- start widgets styles -------------------------- */
 
 
-/** * 2.1 * -------------------------- FLUID IMAGES WIDGET -------------------------- */
+/**
+ * 2.1
+ * -------------------------- FLUID IMAGES WIDGET -------------------------- */
 
 .lptw_recent_posts_fluid_images_widget .widget-title {
   border-bottom: 0 none;
@@ -121,7 +140,9 @@ ul.lptw-recent-posts-fluid-images-widget {
   color: #111111;
 }
 
-/** * 2.2 * -------------------------- SMALL THUMBNAILS WIDGET -------------------------- */
+/**
+ * 2.2
+ * -------------------------- SMALL THUMBNAILS WIDGET -------------------------- */
 
 .lptw_recent_posts_thumbnails_widget .widget-title {
   border-bottom: 0 none;
@@ -176,14 +197,16 @@ ul.lptw-recent-posts-thumbnails-widget {
 /* -------------------------- end of widgets styles -------------------------- */
 
 
-/** * 3 * -------------------------- start shortcodes styles -------------------------- */
+/**
+ * 3
+ * -------------------------- start shortcodes styles -------------------------- */
 
 .lptw-columns-fixed {
   float: left;
   position: relative;
   min-height: 1px;
   margin: 0;
-  box-sizing: border-box;
+  box-sizing: content-box;
 }
 
 .lptw-columns-1, .lptw-columns-2, .lptw-columns-3, .lptw-columns-4, .lptw-columns-5, .lptw-columns-6, .lptw-columns-7, .columns-8, .lptw-columns-9, .lptw-columns-10, .lptw-columns-11, .lptw-columns-12 {
@@ -230,7 +253,9 @@ ul.lptw-recent-posts-thumbnails-widget {
   width: 8.33333333%;
 }
 
-/** * 3.1 * -------------------------- BASIC LAYOUT -------------------------- */
+/**
+ * 3.1
+ * -------------------------- BASIC LAYOUT -------------------------- */
 
 #basic-container {
     overflow: hidden;
@@ -295,7 +320,9 @@ ul.lptw-recent-posts-thumbnails-widget {
   height: auto;
 }
 
-/** * 3.2 * -------------------------- THUMBNAIL LAYOUT -------------------------- */
+/**
+ * 3.2
+ * -------------------------- THUMBNAIL LAYOUT -------------------------- */
 
  #thumbnail-container {
      overflow: hidden;
@@ -342,7 +369,9 @@ ul.lptw-recent-posts-thumbnails-widget {
   text-decoration: none;
 }
 
-/** * 3.3 * -------------------------- DROP CAP LAYOUT -------------------------- */
+/**
+ * 3.3
+ * -------------------------- DROP CAP LAYOUT -------------------------- */
 
 #dropcap-container {
     overflow: hidden;
@@ -378,7 +407,9 @@ ul.lptw-recent-posts-thumbnails-widget {
   color: #333333;
 }
 
-/** * 3.4 * -------------------------- GRID LAYOUT -------------------------- */
+/**
+ * 3.4
+ * -------------------------- GRID LAYOUT -------------------------- */
 
  #grid-container {
     overflow: hidden;
