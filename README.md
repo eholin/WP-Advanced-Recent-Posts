@@ -25,6 +25,10 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.11
+* Added text color setting for Basic Layout
+* Added text and background color settings for Responsive Grid Layout
+
 ## 0.6.10
 * Added sorting of the posts by the following parameters:
   * Title

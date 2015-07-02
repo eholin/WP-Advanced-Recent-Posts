@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.10
+Version: 0.6.11
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -987,7 +987,8 @@ function lptw_display_recent_posts ( $atts ) {
         'space_hor'                 => 10,
         'space_ver'                 => 10,
         'tags_id'                   => '',
-        'tags_exclude'              => 'false'
+        'tags_exclude'              => 'false',
+        'override_colors'           => 'false'
     ), $atts );
 
     if ($a['no_thumbnails'] == 'hide') { $meta_key = '_thumbnail_id'; }
@@ -1117,13 +1118,17 @@ function lptw_display_recent_posts ( $atts ) {
             /* start layouts output */
             /* basic layout - one or tho columns, fixed or adaptive width */
             if ($a['layout'] == 'basic' ) {
-                $content .= '<article class="basic-layout '.$column_style.' '.$cell_style.'" '.lptw_create_element_style($element_style_args).'><header>';
-                if ($url != '') {$content .= '<a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>';}
+                $content .= '<article class="basic-layout '.$column_style.'" '.lptw_create_element_style($element_style_args).'><header>';
+                if ($url != '') {
+                    $content .= '<a href="'.get_the_permalink().'" class="lptw-post-thumbnail-link"><div class="overlay overlay-'.$a['color_scheme'].'"><img src="'.$url.'" alt="'.get_the_title().'" class="fluid" /></div>';
+                    }
                 else {
                     $content .= '<a href="'.get_the_permalink().'" class="lptw-thumbnail-noimglink"><div class="user-overlay" style="background-color: '.$a['background_color'].';"></div>';
                     $a['color-scheme'] = 'user';
-                    $user_text_color = 'style="color: '.$a['text_color'].';"';
                     }
+                if ( $a['override_colors'] == 'true' ) { $user_text_color = 'style="color: '.$a['text_color'].';"'; }
+                else { $user_text_color = ''; }
+
                 $content .= '<div class="lptw-post-header">';
                 if ( $a['show_date_before_title'] == 'true' ) {
                 	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
@@ -1140,7 +1145,7 @@ function lptw_display_recent_posts ( $atts ) {
             /* small thumbnails */
             } elseif ($a['layout'] == 'thumbnail' ) {
                 $thumb_100 = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), array ( 100,100 ) );
-                $content .= '<article class="thumbnail-layout '.$column_style.' '.$cell_style.'" '.lptw_create_element_style($element_style_args).'>';
+                $content .= '<article class="thumbnail-layout '.$column_style.'" '.lptw_create_element_style($element_style_args).'>';
                 $title = get_the_title();
                 if ($thumb_100 == '') {
                     $first_letter = substr($title, 0, 1);
@@ -1165,7 +1170,7 @@ function lptw_display_recent_posts ( $atts ) {
                 $post_date = get_the_date('M.Y');
                 $post_day = get_the_date('d');
 
-                $content .= '<article class="dropcap-layout '.$column_style.' '.$cell_style.'" '.lptw_create_element_style($element_style_args).'>
+                $content .= '<article class="dropcap-layout '.$column_style.'" '.lptw_create_element_style($element_style_args).'>
                 <header>
                     <div class="lptw-dropcap-date" style="background-color: '.$a['background_color'].'">
                         <span class="lptw-dropcap-day" style="color: '.$a['text_color'].'">'.$post_day.'</span>
@@ -1188,6 +1193,10 @@ function lptw_display_recent_posts ( $atts ) {
 
                 if ( $a['height'] > 0 ) { $element_style_args[] = 'height: '.$a['height'].'px;'; }
 
+                if ( $a['override_colors'] == 'true' ) {
+                    $user_text_color = 'style="color: '.$a['text_color'].';"';
+                    $element_style_args[] = 'background-color: '.$a['background_color'].';';
+                } else { $user_text_color = ''; }
                 $featured = get_post_meta ($post_id, 'featured_post', true);
                 if ($featured == 'on') {
                     $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'lptw-grid-large' );
@@ -1203,11 +1212,11 @@ function lptw_display_recent_posts ( $atts ) {
                             <a href="'.get_the_permalink().'" class="lptw-post-grid-link"><div class="overlay overlay-'.$a['color_scheme'].'"></div>
                             <div class="lptw-post-header">';
                     if ( $a['show_date_before_title'] == 'true' ) {
-                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
-                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
+                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
                     } else {
-                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'">'.get_the_title().'</span>';
-                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
                     }
                     $content .= '</div>
                             </a>
@@ -1226,20 +1235,20 @@ function lptw_display_recent_posts ( $atts ) {
                             <a href="'.get_the_permalink().'" class="lptw-post-grid-img"><img src="'.$url_grid.'" alt="'.get_the_title().'" /></a>
                             <div class="lptw-post-header">';
                     if ( $a['show_date_before_title'] == 'true' ) {
-                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
-                		$content .= '<a class="lptw-post-title title-'.$a['color_scheme'].'" href="'.get_the_permalink().'">'.get_the_title().'</a>';
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
+                		$content .= '<a class="lptw-post-title title-'.$a['color_scheme'].'" href="'.get_the_permalink().'" '.$user_text_color.'>'.get_the_title().'</a>';
                     } else {
-                		$content .= '<a class="lptw-post-title title-'.$a['color_scheme'].'" href="'.get_the_permalink().'">'.get_the_title().'</a>';
-                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'">'.$post_date_time.'</span>';}
+                		$content .= '<a class="lptw-post-title title-'.$a['color_scheme'].'" href="'.get_the_permalink().'" '.$user_text_color.'>'.get_the_title().'</a>';
+                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
                     }
                     $content .= '</div>
                         </header>';
                     if ( has_excerpt( $post_id ) ) {
                         $my_excerpt = get_the_excerpt();
-                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'">' . $my_excerpt . '</content>';
+                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'" '.$user_text_color.'>' . $my_excerpt . '</content>';
                     } else {
                         $my_excerpt = lptw_custom_excerpt(35);
-                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'">' . $my_excerpt . '</content>';
+                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'" '.$user_text_color.'>' . $my_excerpt . '</content>';
                     }
                     $content .= '</article>';
                 }

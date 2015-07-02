@@ -256,7 +256,11 @@ function lptw_recent_posts_manage_shortcodes() {
                         <label for="dropcap-text-color">Text color</label><br>
                         <input type="text" value="#ffffff" data-default-color="#ffffff" class="color-field" name="dropcap-text-color" id="dropcap-text-color" />
                     </div>
-                    <p class="description">For Drop Cap layout. Also used in other Layouts if the Posts have no Featured Image.</p>
+                    <p class="description">For Basic and Drop Cap layout. Also used in other Layouts if Posts have no Featured Image.</p>
+                    <p>
+                        <label for="override_colors"><input type="checkbox" value="0" id="override_colors" name="override_colors">
+                        Override colors in CSS.</label>
+                    </p>
                 </td>
             </tr>
             <tr>
