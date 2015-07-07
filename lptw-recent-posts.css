@@ -1,4 +1,4 @@
-/* version 0.6.10 */
+/* version 0.6.12 */
 /*--------------------------------------------------------------
 >>> TABLE OF CONTENTS:
 ----------------------------------------------------------------
@@ -411,9 +411,13 @@ ul.lptw-recent-posts-thumbnails-widget {
  * 3.4
  * -------------------------- GRID LAYOUT -------------------------- */
 
- #grid-container {
+ .lptw-container {
     overflow: hidden;
  }
+
+.grid-layout .overlay {
+  display: none;
+}
 
 .lptw-post-grid-img {
   display: block;
@@ -444,7 +448,7 @@ ul.lptw-recent-posts-thumbnails-widget {
   font-size: 0.75em;
 }
 .lptw-grid-element {
-  min-height: 400px;
+  /*min-height: 400px;*/
   overflow: hidden;
   box-sizing: border-box;
 }

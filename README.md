@@ -25,6 +25,14 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.12
+* Added the Post Excerpt settings: now you can show or hide an Excerpt of all Posts in the Responsive Grid, also you can set the Post Excerpt lenght and use or ignore &lt;!-- more --&gt; tag.
+* Added new settings of Post height in the Responsive Grid:
+  * Height of a Featured Post
+  * The minimal height of all Posts
+* Fixed issue with incorect height of elements of the Responsive Grid in Chrome and Safari
+* Fixed issue with incorrect work of two or more shortcodes on the page
+
 ## 0.6.11
 * Added text color setting for Basic Layout
 * Added text and background color settings for Responsive Grid Layout

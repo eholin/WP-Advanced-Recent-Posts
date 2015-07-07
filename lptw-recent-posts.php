@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.11
+Version: 0.6.12
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -26,17 +26,20 @@ function lptw_recent_posts_activate () {
 }
 
 /* trim excerpt to custom size */
-function lptw_custom_excerpt ($limit) {
-      $excerpt = explode(' ', get_the_excerpt(), $limit);
-      if (count($excerpt)>=$limit) {
+function lptw_custom_excerpt ($limit, $ignore_more_tag) {
+    global $more;
+    if ($ignore_more_tag == 'true') { $more = 1; }
+    else { $more = 0; }
+    $excerpt = explode(' ', get_the_excerpt(), $limit);
+    if (count($excerpt)>=$limit) {
         array_pop($excerpt);
         $excerpt = implode(" ",$excerpt).'...';
-      } else {
+    } else {
         $excerpt = implode(" ",$excerpt);
-      }
-      $excerpt = preg_replace('`\[[^\]]*\]`','',$excerpt);
-      return $excerpt;
     }
+    $excerpt = preg_replace('`\[[^\]]*\]`','',$excerpt);
+    return $excerpt;
+}
 
 register_activation_hook( __FILE__, 'lptw_recent_posts_activate' );
 
@@ -949,7 +952,6 @@ function lptw_create_element_style ($style_args) {
     }
 }
 
-
 /**
 -------------------------------------- Shortcode --------------------------------------
 **/
@@ -972,6 +974,8 @@ function lptw_display_recent_posts ( $atts ) {
         'fluid_images'              => 'false',
         'columns'                   => '1',
         'height'                    => '',
+        'featured_height'           => '400',
+        'min_height'                => '400',
         'width'                     => '300',
         'date_format'               => 'd.m.Y',
         'time_format'               => 'H:i',
@@ -988,7 +992,10 @@ function lptw_display_recent_posts ( $atts ) {
         'space_ver'                 => 10,
         'tags_id'                   => '',
         'tags_exclude'              => 'false',
-        'override_colors'           => 'false'
+        'override_colors'           => 'false',
+        'excerpt_show'              => 'true',
+        'excerpt_lenght'            => '35',
+        'ignore_more_tag'           => 'false'
     ), $atts );
 
     if ($a['no_thumbnails'] == 'hide') { $meta_key = '_thumbnail_id'; }
@@ -1062,11 +1069,18 @@ function lptw_display_recent_posts ( $atts ) {
                 $content .= '<div id="dropcap-container">';
             break;
             case 'grid-medium':
-                $content .= '<div id="grid-container">';
+                $rand_grid = rand(11111, 99999);
+                $content .= '<div class="lptw-container" id="lptw-grid-'.$rand_grid.'">';
             break;
         }
         while( $lptw_shortcode_query->have_posts() ) {
             $lptw_shortcode_query->the_post();
+            /*
+            echo '<pre>';
+            echo $lptw_shortcode_query->post->ID;
+            echo $lptw_shortcode_query->post->post_excerpt;
+            echo '</pre>';
+            */
 
             $element_style_args = Array();
             if ($a['width'] != '' && $a['fluid_images'] != 'true')  {$element_style_args[] = 'width:'.$a['width'].'px;';}
@@ -1180,8 +1194,9 @@ function lptw_display_recent_posts ( $atts ) {
                 </header>
             </article>';
 
-            /* recent posts with thumbnail and featured posts */
+            /* Responsive Grid - recent posts with thumbnail and featured posts */
             } elseif ($a['layout'] == 'grid-medium' ) {
+                $featured_height = $a['featured_height'] . 'px';
                 if ($a['fluid_images'] == 'true') {
                     $base_width = (100 / $a['columns']) - 1;
                     $normal_width = number_format($base_width, 2, '.', '') . '%';
@@ -1192,6 +1207,8 @@ function lptw_display_recent_posts ( $atts ) {
                 }
 
                 if ( $a['height'] > 0 ) { $element_style_args[] = 'height: '.$a['height'].'px;'; }
+                if ( $a['excerpt_show'] == 'false' ) { $element_style_args[] = 'padding-bottom: 0.5rem;'; }
+                if ( $a['min_height'] > 0 ) { $element_style_args[] = 'min-height: '.$a['min_height'].'px;'; }
 
                 if ( $a['override_colors'] == 'true' ) {
                     $user_text_color = 'style="color: '.$a['text_color'].';"';
@@ -1203,6 +1220,7 @@ function lptw_display_recent_posts ( $atts ) {
                     $url_grid = $thumb_grid['0'];
 
                     $element_style_args[] = 'width: ' . $featured_width . ';';
+                    $element_style_args[] = 'min-height: ' . $featured_height . ';';
                     $element_style_args[] = 'background: url('.$url_grid.') center center no-repeat;';
                     $element_style_args[] = 'background-size: cover;';
 
@@ -1243,12 +1261,14 @@ function lptw_display_recent_posts ( $atts ) {
                     }
                     $content .= '</div>
                         </header>';
-                    if ( has_excerpt( $post_id ) ) {
-                        $my_excerpt = get_the_excerpt();
-                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'" '.$user_text_color.'>' . $my_excerpt . '</content>';
-                    } else {
-                        $my_excerpt = lptw_custom_excerpt(35);
-                        $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'" '.$user_text_color.'>' . $my_excerpt . '</content>';
+                    if ($a['excerpt_show'] == 'true') {
+                        $manual_excerpt = $lptw_shortcode_query->post->post_excerpt;
+                        if ( !empty($manual_excerpt) ) {
+                            $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'" '.$user_text_color.'>' . $manual_excerpt . '</content>';
+                        } else {
+                            $my_excerpt = lptw_custom_excerpt($a['excerpt_lenght'], $a['ignore_more_tag']);
+                            $content .= '<content class="post-excerpt content-'.$a['color_scheme'].'" '.$user_text_color.'>' . $my_excerpt . '</content>';
+                        }
                     }
                     $content .= '</article>';
                 }
@@ -1259,8 +1279,10 @@ function lptw_display_recent_posts ( $atts ) {
         $content .= '</div>';
         if ($a['layout'] == 'grid-medium') {
             $content .= '<script>
-                            jQuery(document).ready(function($) {
-                              var $container = $("#grid-container");
+                            jQuery(window).on("load", function() {
+                              var $ = jQuery;
+                              $(".overlay").css("display", "block");
+                              var $container = $("#lptw-grid-'.$rand_grid.'");
                               var fluid_images = '.$a['fluid_images'].';
                               var countedColumnWidth;
 

@@ -95,7 +95,7 @@ function lptw_recent_posts_manage_shortcodes() {
                 </td>
             </tr>
             <tr id="columns_and_width">
-                <th scope="row">Columns and width:</th>
+                <th scope="row">Columns and dimensions:</th>
                 <td>
                     <div class="lptw-sb-row">
                         <legend class="screen-reader-text"><span>Adaptive layout </span></legend>
@@ -119,7 +119,15 @@ function lptw_recent_posts_manage_shortcodes() {
                     </div>
                     <div class="lptw-sb-row">
                         <label for="sb_height"><input type="number" class="small-text layout-basic-hide layout-grid-show layout-thumbnail-hide layout-dropcap-hide" value="400" id="sb_height" min="1" step="1" name="sb_height" disabled="disabled">
-                        The fixed height of the cell in pixels, only for Responsive Grid. If not set - all cells have auto height.</label>
+                        The fixed height of the Post in pixels, only for Responsive Grid. If value = 0, height of all Featured set to auto height.</label>
+                    </div>
+                    <div class="lptw-sb-row">
+                        <label for="sb_featured_height"><input type="number" class="small-text layout-basic-hide layout-grid-show layout-thumbnail-hide layout-dropcap-hide" value="400" id="sb_featured_height" min="1" step="1" name="sb_featured_height" disabled="disabled">
+                        The fixed height of the <b><u>Featured</u></b> Post in pixels, only for Responsive Grid. If value = 0, height of all <b><u>Featured</u></b> Posts set to 400 px.</label>
+                    </div>
+                    <div class="lptw-sb-row">
+                        <label for="sb_min_height"><input type="number" class="small-text layout-basic-hide layout-grid-show layout-thumbnail-hide layout-dropcap-hide" value="0" id="sb_min_height" min="0" step="1" name="sb_min_height" disabled="disabled">
+                        The minimal height of all Posts in pixels, only for Responsive Grid. If value = 0, minimal height is not limited.</label>
                     </div>
                 </td>
             </tr>
@@ -261,6 +269,26 @@ function lptw_recent_posts_manage_shortcodes() {
                         <label for="override_colors"><input type="checkbox" value="0" id="override_colors" name="override_colors">
                         Override colors in CSS.</label>
                     </p>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Post Excerpt:</th>
+                <td>
+                    <fieldset id="post_excerpt" class="layout-basic-hide layout-grid-show layout-thumbnail-hide layout-dropcap-hide" disabled="disabled">
+                        <p>
+                            <label for="excerpt_show"><input type="checkbox" checked="checked" value="0" id="excerpt_show" name="excerpt_show" >
+                            Show the Post Excerpt.</label>
+                        </p>
+                        <p>
+                            <label for="excerpt_lenght"><input type="number" class="small-text" value="35" id="excerpt_lenght" min="1" step="1" name="excerpt_lenght">
+                            Post Excerpt lenght in words.</label>
+                        </p>
+                        <p>
+                            <label for="ignore_more_tag"><input type="checkbox" value="0" id="ignore_more_tag" name="ignore_more_tag" >
+                            Ignore &lt;!-- more --&gt; tag.</label>
+                        </p>
+                    </fieldset>
+                    <p class="description">Only for Responsive Grid layout yet.</p>
                 </td>
             </tr>
             <tr>
