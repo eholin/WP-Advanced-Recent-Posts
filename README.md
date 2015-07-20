@@ -25,6 +25,9 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.13 pre-release
+* Fixed issue with disappearing the link to another plugin in WordPress Menu
+
 ## 0.6.12
 * Added the Post Excerpt settings: now you can show or hide an Excerpt of all Posts in the Responsive Grid, also you can set the Post Excerpt lenght and use or ignore &lt;!-- more --&gt; tag.
 * Added new settings of Post height in the Responsive Grid:

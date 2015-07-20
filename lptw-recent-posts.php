@@ -1354,7 +1354,7 @@ add_shortcode( 'lptw_recentposts', 'lptw_display_recent_posts' );
  * Add Shortcode Builder
  */
 function lptw_register_recent_posts_menu_page(){
-    add_menu_page( 'Advanced Recent Posts', 'Advanced Recent Posts', 'manage_options', 'recent_posts', 'lptw_recent_posts_manage_shortcodes', 'dashicons-editor-code', 100 );
+    add_menu_page( 'Advanced Recent Posts', 'Advanced Recent Posts', 'manage_options', 'recent_posts', 'lptw_recent_posts_manage_shortcodes', 'dashicons-editor-code' );
 }
 add_action( 'admin_menu', 'lptw_register_recent_posts_menu_page' );
 
