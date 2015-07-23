@@ -6,7 +6,7 @@ Plugin on [wordpress.org](https://wordpress.org/plugins/advanced-recent-posts/)
 
 **Introducing new feature in 0.6.13 version: the embedded video instead of the Post Featured Image**
 
-You can use the embedded video (first movie) instead of the Post Featured Image in Responsive Grid Layout. If you have any ideas about this feature or it work not properly, please write me in special topic on <a href="https://wordpress.org/support/plugin/advanced-recent-posts" target="_blank">Support Forum</a>'
+You can use the embedded video (first movie) instead of the Post Featured Image in Responsive Grid Layout. If you have any ideas about this feature or it work not properly, please write me in special topic on <a href="https://wordpress.org/support/topic/new-feature-in-0613-the-embedded-video-instead-of-the-post-featured-image" target="_blank">Support Forum</a>'
 
 Advanced Recent Posts plugin shows the recent posts with thumbnails in two areas:
 * widget in your sidebar
