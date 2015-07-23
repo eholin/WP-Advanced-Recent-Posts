@@ -31,7 +31,7 @@
 .layout-list .dashicons {
     line-height: 1.35;
 }
-/* WIDGETS BACKEND */
+/* -------------------------- WIDGETS BACKEND -------------------------- */
 
 #lptw-categories-wrapper {
     display: none;
@@ -78,4 +78,10 @@
 .chosen-container {
     margin: 1em 0 0 0;
     width: 100%;
+}
+/* -------------------------- ADMIN BACKEND -------------------------- */
+#lptw-embedded-video-settings {
+  border-top: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+  margin: 15px 0;
 }

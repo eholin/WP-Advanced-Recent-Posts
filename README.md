@@ -4,12 +4,9 @@ License: GPLv2 or later
 
 Plugin on [wordpress.org](https://wordpress.org/plugins/advanced-recent-posts/)
 
-**Introducing new feature in 0.6 version: Responsive Grid Layout**
+**Introducing new feature in 0.6.13 version: the embedded video instead of the Post Featured Image**
 
-Responsive Grid Layout based on Masonry script and you can insert the new layout in your page or template with shortcode.
-Now Advanced Recent Posts plugin have only one grid layout - based on Medium (300px width) thumbnail size.
-Also you can Feature some posts - they will be show in the grid increased.
-See [live demo](http://demo.lp-tricks.com/recent-posts/responsive-grid-dark/) of the new layout!
+You can use the embedded video (first movie) instead of the Post Featured Image in Responsive Grid Layout. If you have any ideas about this feature or it work not properly, please write me in special topic on <a href="https://wordpress.org/support/plugin/advanced-recent-posts" target="_blank">Support Forum</a>'
 
 Advanced Recent Posts plugin shows the recent posts with thumbnails in two areas:
 * widget in your sidebar
@@ -25,7 +22,9 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
-## 0.6.13 pre-release
+## 0.6.13
+* Added embedded video support. Now the embedded video can be displayed instead of Featured Image in Responsive Grid Layout
+* Fixed bug with styles and scripts in Widgets Management
 * Fixed issue with disappearing the link to another plugin in WordPress Menu
 
 ## 0.6.12

@@ -4,7 +4,7 @@ Plugin Name: Advanced Recent Posts
 Plugin URI: http://lp-tricks.com/
 Description: Plugin that shows the recent posts with thumbnails in the widget and in other parts of the your blog or theme with shortcodes.
 Tags: widget, posts, plugin, recent, recent posts, latest, latest posts, shortcode, thumbnail, thumbnails, categories, content, featured image, Taxonomy, custom post type, custom
-Version: 0.6.12
+Version: 0.6.13
 Author: Eugene Holin
 Author URI: http://lp-tricks.com/
 License: GPLv2 or later
@@ -61,12 +61,17 @@ function lptw_recent_posts_options_box_content ( $post ) {
     // Add a nonce field so we can check for it later.
 	wp_nonce_field( 'lptw_recent_posts_options_box', 'lptw_recent_posts_meta_box_nonce' );
 
-    $value = get_post_meta( $post->ID, 'featured_post', true );
+    $featured_post = get_post_meta( $post->ID, 'featured_post', true );
+    $embedded_video = get_post_meta( $post->ID, 'embedded_video', true );
+    $hide_youtube_controls = get_post_meta( $post->ID, 'hide_youtube_controls', true );
 
-    if ($value == 'on') {$checked = 'checked="checked"';}
-    else {$checked = '';}
-    echo '<p><label class="lptw-checkbox-label" for="featured_post"><input class="checkbox" type="checkbox" '.$checked.' id="featured_post" name="featured_post" />&nbsp;'.__( 'Featured post', 'lptw_recent_posts_domain' ).'</label></p>';
-    echo '<p class="description">'.__( 'Featured post displays larger than the other posts in Grid Layout', 'lptw_recent_posts_domain' ).'</p>';
+    echo '<p><label class="lptw-checkbox-label" for="featured_post"><input class="checkbox" type="checkbox" '.checked( $featured_post, 'on', false ).' id="featured_post" name="featured_post" />&nbsp;'.__( 'Featured post', 'lptw_recent_posts_domain' ).'</label></p>';
+    echo '<p class="description">'.__( 'Featured post displays larger than the other posts in Responsive Grid Layout', 'lptw_recent_posts_domain' ).'</p>';
+    echo '<div id="lptw-embedded-video-settings">';
+    echo '<p><label class="lptw-checkbox-label" for="embedded_video"><input class="checkbox" type="checkbox" '.checked( $embedded_video, 'on', false ).' id="embedded_video" name="embedded_video" />&nbsp;'.__( 'Use embedded video (Experimental feature!!! It may not work properly.)', 'lptw_recent_posts_domain' ).'</label></p>';
+    echo '<p><label class="lptw-checkbox-label" for="hide_youtube_controls"><input class="checkbox" type="checkbox" '.checked( $hide_youtube_controls, 'on', false ).' id="hide_youtube_controls" name="hide_youtube_controls" />&nbsp;'.__( 'Hide Youtube player controls', 'lptw_recent_posts_domain' ).'</label></p>';
+    echo '<p class="description">'.__( 'Use embedded video (first movie) instead of the Post Featured Image in Responsive Grid Layout. If you have any ideas about this feature or it work not properly, please write me in special topic on <a href="https://wordpress.org/support/topic/new-feature-in-0613-the-embedded-video-instead-of-the-post-featured-image" target="_blank">Support Forum</a>', 'lptw_recent_posts_domain' ).'</p>';
+    echo '</div>';
 }
 
 function lptw_recent_posts_options_save_meta_box_data( $post_id ) {
@@ -108,10 +113,14 @@ function lptw_recent_posts_options_save_meta_box_data( $post_id ) {
 	/* OK, it's safe for us to save the data now. */
 
 	// Sanitize user input.
-	$my_data = sanitize_text_field( $_POST['featured_post'] );
+	$featured_post = sanitize_text_field( $_POST['featured_post'] );
+	$embedded_video = sanitize_text_field( $_POST['embedded_video'] );
+	$hide_youtube_controls = sanitize_text_field( $_POST['hide_youtube_controls'] );
 
 	// Update the meta field in the database.
-	update_post_meta( $post_id, 'featured_post', $my_data );
+	update_post_meta( $post_id, 'featured_post', $featured_post );
+	update_post_meta( $post_id, 'embedded_video', $embedded_video );
+	update_post_meta( $post_id, 'hide_youtube_controls', $hide_youtube_controls );
 }
 add_action( 'save_post', 'lptw_recent_posts_options_save_meta_box_data' );
 
@@ -1214,43 +1223,61 @@ function lptw_display_recent_posts ( $atts ) {
                     $user_text_color = 'style="color: '.$a['text_color'].';"';
                     $element_style_args[] = 'background-color: '.$a['background_color'].';';
                 } else { $user_text_color = ''; }
+
                 $featured = get_post_meta ($post_id, 'featured_post', true);
+                $embedded_video = get_post_meta ($post_id, 'embedded_video', true);
+                $hide_youtube_controls = get_post_meta ($post_id, 'hide_youtube_controls', true);
+
+                /* get embedded video frame code */
+                $embedded_video_frame = lptw_get_first_embed_media($post_id);
+
                 if ($featured == 'on') {
                     $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'lptw-grid-large' );
-                    $url_grid = $thumb_grid['0'];
 
                     $element_style_args[] = 'width: ' . $featured_width . ';';
                     $element_style_args[] = 'min-height: ' . $featured_height . ';';
-                    $element_style_args[] = 'background: url('.$url_grid.') center center no-repeat;';
-                    $element_style_args[] = 'background-size: cover;';
+                    if ( $embedded_video != 'on' ) {
+                        $element_style_args[] = 'background: url('.$thumb_grid['0'].') center center no-repeat;';
+                        $element_style_args[] = 'background-size: cover;';
+                        $featured_media_content = '<a href="'.get_the_permalink().'" class="lptw-post-grid-link"><div class="overlay overlay-'.$a['color_scheme'].'"></div>
+                            <div class="lptw-post-header">';
+                            if ( $a['show_date_before_title'] == 'true' ) {
+                            	if ( $a['show_date'] == 'true') {$featured_media_content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
+                        		$featured_media_content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
+                            } else {
+                        		$featured_media_content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
+                            	if ( $a['show_date'] == 'true') {$featured_media_content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
+                            }
+                        $featured_media_content .= '</div></a>';
+                    } else {
+                        $featured_media_content = $embedded_video_frame;
+                        $grid_class = 'lptw-video-container-featured';
+                        if ( $hide_youtube_controls != 'on' ) { $grid_class .= ' lptw-video-container-controls'; }
+                    }
 
                     $content .= '
-                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element lptw-featured" '.lptw_create_element_style($element_style_args).'>
+                    <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element lptw-featured ' . $grid_class . '" '.lptw_create_element_style($element_style_args).'>
                         <header>
-                            <a href="'.get_the_permalink().'" class="lptw-post-grid-link"><div class="overlay overlay-'.$a['color_scheme'].'"></div>
-                            <div class="lptw-post-header">';
-                    if ( $a['show_date_before_title'] == 'true' ) {
-                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
-                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
-                    } else {
-                		$content .= '<span class="lptw-post-title title-'.$a['color_scheme'].'" '.$user_text_color.'>'.get_the_title().'</span>';
-                    	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
-                    }
-                    $content .= '</div>
-                            </a>
-                        </header>';
-                    $content .= '</article>';
+                            '.$featured_media_content.'
+                        </header>
+                    </article>';
                 }
                 else {
-                    $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'large' );
-                    $url_grid = $thumb_grid['0'];
+                    if ($embedded_video == 'on' && $embedded_video_frame !== false) {
+                        if ( $hide_youtube_controls != 'on' ) { $controls_class = 'lptw-video-container-controls'; }
+                        else { $controls_class = ''; }
+                        $featured_media_content = '<div class="lptw-video-container '.$controls_class.'">'.$embedded_video_frame.'</div>';
+                    } else {
+                        $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'large' );
+                        $featured_media_content = '<img src="'.$thumb_grid['0'].'" alt="'.get_the_title().'" />';
+                    }
 
                     $element_style_args[] = 'width: ' . $normal_width . ';';
 
                     $content .= '
                     <article id="grid-'. $post_id .'" class="grid-layout lptw-grid-element grid-element-'.$a['color_scheme'].'" '.lptw_create_element_style($element_style_args).'>
                         <header>
-                            <a href="'.get_the_permalink().'" class="lptw-post-grid-img"><img src="'.$url_grid.'" alt="'.get_the_title().'" /></a>
+                            <a href="'.get_the_permalink().'" class="lptw-post-grid-img">'.$featured_media_content.'</a>
                             <div class="lptw-post-header">';
                     if ( $a['show_date_before_title'] == 'true' ) {
                     	if ( $a['show_date'] == 'true') {$content .= '<span class="lptw-post-date date-'.$a['color_scheme'].'" '.$user_text_color.'>'.$post_date_time.'</span>';}
@@ -1350,6 +1377,57 @@ function lptw_display_recent_posts ( $atts ) {
 
 add_shortcode( 'lptw_recentposts', 'lptw_display_recent_posts' );
 
+/**
+ Find embedded video and use standard oembed to display it
+ **/
+/* --------------------------------------------- second function --------------------------------------------- */
+function lptw_get_first_embed_media($post_id) {
+
+    $post = get_post($post_id);
+    $reg = preg_match('|^\s*(https?://[^\s"]+)\s*$|im', get_the_content(), $embeds);
+
+    $embed_args = Array ( 'width' => 400, 'height' => 200 );
+
+    if( !empty($embeds) ) {
+        //return first embed
+        $embed_code = wp_oembed_get( trim($embeds[0]), $embed_args );
+        return $embed_code;
+
+    } else {
+        //No embeds found
+        return false;
+    }
+
+}
+
+/* --------------------------------------------- Filter video output --------------------------------------------- */
+
+add_filter('oembed_result','lptw_oembed_result', 10, 3);
+function lptw_oembed_result ($html, $url, $args) {
+    global $post;
+
+    // $args includes custom argument
+    /* ---------------- only for youtube ---------------- */
+    /* all arguments */
+    //$args = array( 'rel' => '0', 'controls' => '0', 'showinfo' => '0' );
+
+    $hide_youtube_controls = get_post_meta ($post->ID, 'hide_youtube_controls', true);
+    if ($hide_youtube_controls == 'on') {
+        /* only hide controls */
+        $args = array( 'controls' => 0 );
+    } else { $args = ''; }
+
+
+    if ( strpos($html, 'youtu') !== false && !empty($args) ) {
+    	$parameters = http_build_query( $args );
+
+    	// Modify video parameters
+	    $html = str_replace( '?feature=oembed', '?feature=oembed'.'&amp;'.$parameters, $html );
+    }
+
+    return $html;
+}
+
 /*
  * Add Shortcode Builder
  */
@@ -1361,7 +1439,8 @@ add_action( 'admin_menu', 'lptw_register_recent_posts_menu_page' );
 function lptw_recent_posts_backend_scripts() {
     $screen = get_current_screen();
     $post_type = $screen->id;
-    if ( strpos($post_type, 'page_recent_posts') !== false ) {
+    //echo 'post type: ' . $post_type;
+    if ( strpos($post_type, 'page_recent_posts') !== false || strpos($post_type, 'widgets') !== false ) {
     	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
     	wp_enqueue_style('lptw-recent-posts-backend-style' );
 
@@ -1375,6 +1454,9 @@ function lptw_recent_posts_backend_scripts() {
     	wp_enqueue_style('chosen-style' );
 
         wp_enqueue_script( 'chosen-script', plugins_url ( 'backend/chosen/chosen.jquery.min.js', __FILE__ ), array(), '1.4.2', true );
+    } else if ( $post_type = 'post' ) {
+    	wp_register_style('lptw-recent-posts-backend-style', plugins_url( 'backend/lptw-recent-posts-backend.css', __FILE__ ) );
+    	wp_enqueue_style('lptw-recent-posts-backend-style' );
     }
 }
 add_action( 'admin_enqueue_scripts', 'lptw_recent_posts_backend_scripts' );
