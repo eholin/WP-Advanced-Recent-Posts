@@ -22,6 +22,9 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.14 development
+* Code refactoring
+
 ## 0.6.13
 * Added embedded video support. Now the embedded video can be displayed instead of Featured Image in Responsive Grid Layout
 * Fixed bug with styles and scripts in Widgets Management

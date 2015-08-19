@@ -1,4 +1,4 @@
-/* version 0.6.13 */
+/* version 0.6.14 */
 /*--------------------------------------------------------------
 >>> TABLE OF CONTENTS:
 ----------------------------------------------------------------
@@ -22,6 +22,7 @@
   top: 0;
   width: 100%;
   height: 100%;
+  z-index: 1;
 }
 
 .overlay-dark::before {
@@ -30,7 +31,7 @@
   top: 0;
   width: 100%;
   height: 100%;
-  background: -moz-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
+  z-index: 1;
   /* FF3.6+ */
   
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255, 255, 255, 0)), color-stop(100%, rgba(0, 0, 0, 0.5)));
@@ -38,11 +39,7 @@
   
   background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
   /* Chrome10+,Safari5.1+ */
-  
-  background: -o-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
   /* Opera 11.10+ */
-  
-  background: -ms-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
   /* IE10+ */
   
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
@@ -58,7 +55,7 @@
   top: 0;
   width: 100%;
   height: 100%;
-  background: -moz-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 100%);
+  z-index: 1;
   /* FF3.6+ */
   
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255, 255, 255, 0)), color-stop(100%, rgba(255, 255, 255, 0.9)));
@@ -66,11 +63,7 @@
   
   background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 100%);
   /* Chrome10+,Safari5.1+ */
-  
-  background: -o-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 100%);
   /* Opera 11.10+ */
-  
-  background: -ms-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 100%);
   /* IE10+ */
   
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 100%);
@@ -112,7 +105,7 @@ ul.lptw-recent-posts-fluid-images-widget {
   position: relative;
 }
 
-.lptw-post-thumbnail-link {
+.lptw_recent_posts_fluid_images_widget .lptw-post-thumbnail-link {
   line-height: 0.5em;
 }
 
@@ -341,6 +334,7 @@ ul.lptw-recent-posts-thumbnails-widget {
   right: 0;
   height: auto;
   padding: 1rem;
+  z-index: 10;
 }
 
 .basic-layout .lptw-post-date {
@@ -355,8 +349,16 @@ ul.lptw-recent-posts-thumbnails-widget {
   color: #ffffff;
 }
 
+.basic-layout .date-dark:hover {
+  color: #eeeeee;
+}
+
 .basic-layout .date-light {
   color: #111111;
+}
+
+.basic-layout .date-light:hover {
+  color: #444444;
 }
 
 .basic-layout .lptw-post-title {
@@ -368,8 +370,22 @@ ul.lptw-recent-posts-thumbnails-widget {
   color: #ffffff;
 }
 
+.basic-layout .title-dark:hover {
+  color: #eeeeee;
+}
+
 .basic-layout .title-light {
   color: #111111;
+}
+
+.basic-layout .title-light:hover {
+  color: #444444;
+}
+
+.basic-layout .lptw-post-thumbnail-link {}
+
+.basic-layout .fluid-image-wrapper {
+  display: block;
 }
 
 .basic-layout img.fluid {
@@ -495,6 +511,7 @@ ul.lptw-recent-posts-thumbnails-widget {
   font-size: 1.125em;
   line-height: 1em;
   margin: 0.5rem 0 0.25em 0;
+  text-decoration: none;
 }
 
 .grid-layout .lptw-post-grid-link {
@@ -535,14 +552,23 @@ ul.lptw-recent-posts-thumbnails-widget {
   color: #ffffff;
 }
 
+.grid-layout .date-dark:hover,
+.grid-layout .title-dark:hover {
+  color: #eeeeee;
+}
+
 .grid-layout .content-dark {
   color: #bbbbbb;
 }
 
 .grid-layout .date-light,
-.grid-layout .title-light,
-.grid-layout .content-light {
+.grid-layout .title-light {
   color: #111111;
+}
+
+.grid-layout .date-light:hover,
+.grid-layout .title-light:hover {
+  color: #444444;
 }
 
 .grid-layout .content-light {
@@ -564,6 +590,7 @@ ul.lptw-recent-posts-thumbnails-widget {
   right: 0;
   height: auto;
   padding: 1rem;
+  z-index: 5;
 }
 
 @media only screen and ( max-width: 640px) {
@@ -593,6 +620,7 @@ ul.lptw-recent-posts-thumbnails-widget {
 
 .lptw-grid-element img {
   line-height: 0.5;
+  padding: 0;
 }
 
 .gutter-sizer {
@@ -611,11 +639,11 @@ ul.lptw-recent-posts-thumbnails-widget {
 }
 
 .lptw-video-container-featured iframe {
-    position: absolute;
-    top:0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .lptw-video-container {
@@ -626,10 +654,10 @@ ul.lptw-recent-posts-thumbnails-widget {
 }
 
 .lptw-video-container iframe {
-    position: absolute;
-    top:0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 /* -------------------------- end of shortcodes styles -------------------------- */
