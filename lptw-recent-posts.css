@@ -1,4 +1,6 @@
 /* version 0.6.14 */
+
+
 /*--------------------------------------------------------------
 >>> TABLE OF CONTENTS:
 ----------------------------------------------------------------
@@ -12,6 +14,8 @@
 	3.3 Drop cap layout
     3.4 Grid layout
 --------------------------------------------------------------*/
+
+
 /**
  * 1
 /* -------------------------- start common styles -------------------------- */
@@ -33,18 +37,14 @@
   height: 100%;
   z-index: 1;
   /* FF3.6+ */
-  
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255, 255, 255, 0)), color-stop(100%, rgba(0, 0, 0, 0.5)));
   /* Chrome,Safari4+ */
-  
   background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
   /* Chrome10+,Safari5.1+ */
   /* Opera 11.10+ */
   /* IE10+ */
-  
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
   /* W3C */
-  
   filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#80000000', GradientType=0);
   /* IE6-9 */
 }
@@ -57,24 +57,24 @@
   height: 100%;
   z-index: 1;
   /* FF3.6+ */
-  
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255, 255, 255, 0)), color-stop(100%, rgba(255, 255, 255, 0.9)));
   /* Chrome,Safari4+ */
-  
   background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 100%);
   /* Chrome10+,Safari5.1+ */
   /* Opera 11.10+ */
   /* IE10+ */
-  
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 100%);
   /* W3C */
-  
   filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#e6ffffff', GradientType=0);
   /* IE6-9 */
 }
+
+
 /**
  * 2
 /* -------------------------- start widgets styles -------------------------- */
+
+
 /**
  * 2.1
  * -------------------------- FLUID IMAGES WIDGET -------------------------- */
@@ -123,6 +123,7 @@ ul.lptw-recent-posts-fluid-images-widget {
   height: auto;
   padding: 10px 10px;
   line-height: 1.25;
+  z-index: 10;
 }
 
 .lptw_recent_posts_fluid_images_widget .lptw-post-date {
@@ -153,6 +154,24 @@ ul.lptw-recent-posts-fluid-images-widget {
 .lptw_recent_posts_fluid_images_widget .title-light {
   color: #111111;
 }
+
+.lptw_recent_posts_fluid_images_widget .lptw-post-subtitle {
+  font-weight: 400;
+  display: block;
+  margin: 5px 0;
+  font-size: 0.875em;
+  font-style: italic;
+}
+
+.lptw_recent_posts_fluid_images_widget .subtitle-dark {
+  color: #ffffff;
+}
+
+.lptw_recent_posts_fluid_images_widget .subtitle-light {
+  color: #111111;
+}
+
+
 /**
  * 2.2
  * -------------------------- SMALL THUMBNAILS WIDGET -------------------------- */
@@ -213,7 +232,19 @@ ul.lptw-recent-posts-thumbnails-widget {
   padding-bottom: 5px;
   display: block;
 }
+
+.lptw_recent_posts_thumbnails_widget .lptw-post-subtitle {
+  font-weight: 400;
+  display: block;
+  margin: 0 0 5px 0;
+  font-size: 0.875em;
+  font-style: italic;
+}
+
+
 /* -------------------------- end of widgets styles -------------------------- */
+
+
 /**
  * 3
  * -------------------------- start shortcodes styles -------------------------- */
@@ -292,6 +323,8 @@ ul.lptw-recent-posts-thumbnails-widget {
 .lptw-columns-12 {
   width: 8.33333333%;
 }
+
+
 /**
  * 3.1
  * -------------------------- BASIC LAYOUT -------------------------- */
@@ -343,17 +376,23 @@ ul.lptw-recent-posts-thumbnails-widget {
   font-weight: 300;
   font-size: 1.25em;
   line-height: 1.5em;
+  text-decoration: none;
 }
 
-.basic-layout .date-dark {
+.basic-layout .date-dark,
+.basic-layout .date-dark:visited,
+.basic-layout .date-dark:focus {
   color: #ffffff;
+  outline: none;
 }
 
 .basic-layout .date-dark:hover {
   color: #eeeeee;
 }
 
-.basic-layout .date-light {
+.basic-layout .date-light,
+.basic-layout .date-light:visited,
+.basic-layout .date-light:focus {
   color: #111111;
 }
 
@@ -364,9 +403,12 @@ ul.lptw-recent-posts-thumbnails-widget {
 .basic-layout .lptw-post-title {
   font-weight: 600;
   line-height: 1.5em;
+  text-decoration: none;
 }
 
-.basic-layout .title-dark {
+.basic-layout .title-dark,
+.basic-layout .title-dark:visited,
+.basic-layout .title-dark:focus {
   color: #ffffff;
 }
 
@@ -374,12 +416,34 @@ ul.lptw-recent-posts-thumbnails-widget {
   color: #eeeeee;
 }
 
-.basic-layout .title-light {
+.basic-layout .title-light,
+.basic-layout .title-light:visited,
+.basic-layout .title-light:focus {
   color: #111111;
 }
 
 .basic-layout .title-light:hover {
   color: #444444;
+}
+
+.basic-layout .lptw-post-subtitle {
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.5em;
+  display: block;
+  font-size: 0.875em;
+}
+
+.basic-layout .subtitle-dark,
+.basic-layout .subtitle-dark:visited,
+.basic-layout .subtitle-dark:focus {
+  color: #f0f0f0;
+}
+
+.basic-layout .subtitle-light,
+.basic-layout .subtitle-light:visited,
+.basic-layout .subtitle-light:focus {
+  color: #222222;
 }
 
 .basic-layout .lptw-post-thumbnail-link {}
@@ -393,6 +457,8 @@ ul.lptw-recent-posts-thumbnails-widget {
   max-width: 100%;
   height: auto;
 }
+
+
 /**
  * 3.2
  * -------------------------- THUMBNAIL LAYOUT -------------------------- */
@@ -446,6 +512,18 @@ ul.lptw-recent-posts-thumbnails-widget {
   margin-bottom: 5px;
   text-decoration: none;
 }
+
+.thumbnail-layout .lptw-post-subtitle {
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.5em;
+  display: block;
+  font-size: 0.875em;
+  color: #444444;
+  margin: 5px 0;
+}
+
+
 /**
  * 3.3
  * -------------------------- DROP CAP LAYOUT -------------------------- */
@@ -486,6 +564,18 @@ ul.lptw-recent-posts-thumbnails-widget {
   text-decoration: none;
   color: #333333;
 }
+
+.dropcap-layout .lptw-post-subtitle {
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.5em;
+  display: block;
+  font-size: 0.875em;
+  color: #444444;
+  margin: 5px 0;
+}
+
+
 /**
  * 3.4
  * -------------------------- GRID LAYOUT -------------------------- */
@@ -534,7 +624,6 @@ ul.lptw-recent-posts-thumbnails-widget {
 
 .lptw-grid-element {
   /*min-height: 400px;*/
-  
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -547,13 +636,26 @@ ul.lptw-recent-posts-thumbnails-widget {
   background-color: #ffffff;
 }
 
+.grid-layout .read-more-link {
+  text-decoration: underline;
+}
+
+.grid-layout .read-more-link:hover {
+  text-decoration: none;
+}
+
 .grid-layout .date-dark,
-.grid-layout .title-dark {
+.grid-layout .date-dark:visited,
+.grid-layout .title-dark,
+.grid-layout .title-dark:visited,
+.grid-layout .link-dark,
+.grid-layout .link-dark:visited {
   color: #ffffff;
 }
 
 .grid-layout .date-dark:hover,
-.grid-layout .title-dark:hover {
+.grid-layout .title-dark:hover,
+.grid-layout .link-dark:hover {
   color: #eeeeee;
 }
 
@@ -562,13 +664,35 @@ ul.lptw-recent-posts-thumbnails-widget {
 }
 
 .grid-layout .date-light,
-.grid-layout .title-light {
+.grid-layout .date-light:visited,
+.grid-layout .title-light,
+.grid-layout .title-light:visited,
+.grid-layout .link-light,
+.grid-layout .link-light:visited {
   color: #111111;
 }
 
 .grid-layout .date-light:hover,
-.grid-layout .title-light:hover {
+.grid-layout .title-light:hover,
+.grid-layout .link-light:hover {
   color: #444444;
+}
+
+.grid-layout .lptw-post-subtitle {
+  display: block;
+  font-weight: 400;
+  padding: 0 1rem;
+  margin: 0.5rem 0 0.25em 0;
+  font-size: 0.875em;
+  font-style: italic;
+}
+
+.grid-layout .subtitle-dark {
+  color: #f0f0f0;
+}
+
+.grid-layout .subtitle-light {
+  color: #252525;
 }
 
 .grid-layout .content-light {
@@ -660,4 +784,6 @@ ul.lptw-recent-posts-thumbnails-widget {
   width: 100%;
   height: 100%;
 }
+
+
 /* -------------------------- end of shortcodes styles -------------------------- */

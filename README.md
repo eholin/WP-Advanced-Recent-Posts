@@ -22,8 +22,14 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
-## 0.6.14 development
-* Code refactoring
+## 0.6.14
+* Added support of post offset.
+* Added ability to exclude the current post if the shortcode inserted in the post content or near.
+* Added ability to display Read more link after excerpt in Responsive Grid Layout.
+* Added ability to open links in the same or new window.
+* Added support of post subtitles (both for shortcodes and widgets).
+* Added the ability (both in shortcodes and widgets) to display only the posts of those categories that belong to the post on the page.
+* Deep code refactoring
 
 ## 0.6.13
 * Added embedded video support. Now the embedded video can be displayed instead of Featured Image in Responsive Grid Layout

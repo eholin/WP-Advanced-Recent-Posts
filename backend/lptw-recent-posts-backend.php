@@ -144,6 +144,16 @@ function lptw_recent_posts_manage_shortcodes() {
                     </select>
                 </td>
             </tr>
+            <tr>
+                <th scope="row"><label for="link_target">Post link:</label></th>
+                <td>
+                    <select id="link_target" name="link_target">
+                        <option value="self">This window</option>
+                        <option value="new">New window</option>
+                    </select>
+                    <p class="description">Open link in a this or new window.</p>
+                </td>
+            </tr>
             <tr id="post_authors">
                 <th scope="row"><label for="authors">Authors:</label></th>
                 <td>
@@ -196,6 +206,10 @@ function lptw_recent_posts_manage_shortcodes() {
                         </ul>
                     </fieldset>
                     <p class="description">If none of the categories is selected - will be displayed the posts from all the categories.</p>
+                    <p>
+                        <label for="same_category"><input type="checkbox" value="-1" id="same_category" name="same_category">
+                        Use the same category, where is the post with a shortcode. This option override selected categories.</label>
+                    </p>
                 </td>
             </tr>
             <tr>
@@ -225,8 +239,17 @@ function lptw_recent_posts_manage_shortcodes() {
                         </p>
                         <p class="description">Only for shortcode, not global!</p>
                         <p>
+                            <label for="post_offset"><input type="number" class="small-text" value="0" id="post_offset" min="0" step="1" name="post_offset">
+                            Post offset.</label>
+                        </p>
+                        <p class="description">Number of post to displace or pass over.</p>
+                        <p>
                             <label for="reverse_post_order"><input type="checkbox" value="0" id="reverse_post_order" name="reverse_post_order">
                             Reverse post order: display the latest post last in the list. By default the latest post displays first.</label>
+                        </p>
+                        <p>
+                            <label for="exclude_current_post"><input type="checkbox" value="0" id="exclude_current_post" name="exclude_current_post">
+                            Exclude current post if the shortcode inserted in the post content.</label>
                         </p>
                     </fieldset>
                 </td>
@@ -287,30 +310,46 @@ function lptw_recent_posts_manage_shortcodes() {
                             <label for="ignore_more_tag"><input type="checkbox" value="0" id="ignore_more_tag" name="ignore_more_tag" >
                             Ignore &lt;!-- more --&gt; tag.</label>
                         </p>
+                        <p>
+                            <label for="read_more_show"><input type="checkbox" value="0" id="read_more_show" name="read_more_show" >
+                            Display <em>'Read more'</em> link.</label>
+                        </p>
+                        <p>
+                            <label for="read_more_inline"><input type="checkbox" value="0" id="read_more_inline" name="read_more_inline" >
+                            Display <em>'Read more'</em> link inline with the post excerpt.</label>
+                        </p>
+                        <p>
+                            <label for="read_more_content"><input type="text" value="Read more &rarr;" id="read_more_content" name="read_more_content" >
+                            <em>'Read more'</em> link text (use HTML symbols if needed).</label>
+                        </p>
                     </fieldset>
                     <p class="description">Only for Responsive Grid layout yet.</p>
                 </td>
             </tr>
             <tr>
-                <th scope="row">Show date and time:</th>
+                <th scope="row">Date, time and subtitle settings:</th>
                 <td>
                     <fieldset id="display_date_time" class="layout-basic-show layout-grid-show layout-thumbnail-show layout-dropcap-hide">
                         <legend class="screen-reader-text"><span>Show date and time </span></legend>
                         <p>
                         	<label for="show_date_before_title"><input type="checkbox" checked="checked" value="0" id="show_date_before_title" name="show_date_before_title">
-                        	Display date and time before post title.</label>
+                        	Display <strong>date and time</strong> before post title.</label>
                         </p>
                         <p>
                         	<label for="show_date"><input type="checkbox" checked="checked" value="0" id="show_date" name="show_date">
-                        	Display date in recent posts list</label>
+                        	Display <strong>date</strong> in recent posts list</label>
                         </p>
                         <p>
                         	<label for="show_time"><input type="checkbox" checked="checked" value="0" id="show_time" name="show_time">
-                        	Display time in recent posts list</label>
+                        	Display <strong>time</strong> in recent posts list</label>
                         </p>
                         <p>
                         	<label for="show_time_before"><input type="checkbox" checked="checked" value="0" id="show_time_before" name="show_time_before">
                         	Display time <strong><u>before date</u></strong> in recent posts list. By default - after date.</label>
+                        </p>
+                        <p>
+                        	<label for="show_subtitle"><input type="checkbox" checked="checked" value="0" id="show_subtitle" name="show_subtitle">
+                        	Display <strong>subtitle</strong> in recent posts list after the post title if exist</label>
                         </p>
                     	<p class="description">Only for Basic and Thumbnail layouts.</p>
                     </fieldset>

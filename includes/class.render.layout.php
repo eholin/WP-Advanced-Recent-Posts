@@ -46,6 +46,8 @@ function render_element_attributes ($object) {
     if (!empty($object['style']))       { $content .= ' '.render_element_styles($object['style']); }
     /* create style if exist */
     if (!empty($object['href']))        { $content .= ' href="'.$object['href'].'"'; }
+    /* create target if exist */
+    if (!empty($object['target']))      { $content .= ' target="'.$object['target'].'"'; }
 
     return $content;
 }
@@ -53,7 +55,7 @@ function render_element_attributes ($object) {
 function render_article ($layout_classes, $layout_styles, $layout_sections, $layout_containers, $layout_objects) {
     $content = '<article '.render_element_class($layout_classes).' '.render_element_styles($layout_styles).'>'."\n";
     foreach ( $layout_sections as $section ) {
-        if ($section['display'] === true) {
+        if ($section['display'] == 'true') {
             switch ($section['type']) {
                 case 'header':
                     $content .= '<header';
@@ -105,7 +107,7 @@ function render_article_objects($container_name, $layout_objects) {
     ksort($layout_objects);
     $content = '';
     foreach ( $layout_objects as $object ) {
-        if ($object['display'] === true && $object['container'] == $container_name) {
+        if ($object['display'] == 'true' && $object['container'] == $container_name) {
             $content .= '<'.$object['tag'];
             $content .= render_element_attributes ($object);
             $content .= '>'.$object['content'].'</'.$object['tag'].'>';
@@ -117,7 +119,7 @@ function render_article_objects($container_name, $layout_objects) {
 function render_article_part ($place, $layout_containers, $layout_objects) {
     $content = '';
     foreach ( $layout_containers as $container ) {
-        if ($container['display'] === true && $container['place'] == $place) {
+        if ($container['display'] == 'true' && $container['place'] == $place) {
             $content .= render_article_container ($container, $layout_objects);
         }
     }

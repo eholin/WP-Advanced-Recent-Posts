@@ -61,10 +61,13 @@ function lptw_recent_posts_options_box_content ( $post ) {
     // Add a nonce field so we can check for it later.
 	wp_nonce_field( 'lptw_recent_posts_options_box', 'lptw_recent_posts_meta_box_nonce' );
 
+    $post_subtitle = get_post_meta( $post->ID, 'lptw_post_subtitle', true );
     $featured_post = get_post_meta( $post->ID, 'featured_post', true );
     $embedded_video = get_post_meta( $post->ID, 'embedded_video', true );
     $hide_youtube_controls = get_post_meta( $post->ID, 'hide_youtube_controls', true );
 
+    echo '<p><label class="lptw-checkbox-label" for="post_subtitle"><strong>'.__( 'Post Subtitle:', 'lptw_recent_posts_domain' ).'</strong></label></p>';
+    echo '<p><input class="text" type="text" id="post_subtitle" name="post_subtitle" value="'.esc_attr($post_subtitle).'" /></p>';
     echo '<p><label class="lptw-checkbox-label" for="featured_post"><input class="checkbox" type="checkbox" '.checked( $featured_post, 'on', false ).' id="featured_post" name="featured_post" />&nbsp;'.__( 'Featured post', 'lptw_recent_posts_domain' ).'</label></p>';
     echo '<p class="description">'.__( 'Featured post displays larger than the other posts in Responsive Grid Layout', 'lptw_recent_posts_domain' ).'</p>';
     echo '<div id="lptw-embedded-video-settings">';
@@ -113,11 +116,13 @@ function lptw_recent_posts_options_save_meta_box_data( $post_id ) {
 	/* OK, it's safe for us to save the data now. */
 
 	// Sanitize user input.
+	$post_subtitle = sanitize_text_field( $_POST['post_subtitle'] );
 	$featured_post = sanitize_text_field( $_POST['featured_post'] );
 	$embedded_video = sanitize_text_field( $_POST['embedded_video'] );
 	$hide_youtube_controls = sanitize_text_field( $_POST['hide_youtube_controls'] );
 
 	// Update the meta field in the database.
+	update_post_meta( $post_id, 'lptw_post_subtitle', $post_subtitle );
 	update_post_meta( $post_id, 'featured_post', $featured_post );
 	update_post_meta( $post_id, 'embedded_video', $embedded_video );
 	update_post_meta( $post_id, 'hide_youtube_controls', $hide_youtube_controls );
@@ -157,6 +162,7 @@ function lptw_display_recent_posts ( $atts ) {
         'post_parent'               => '0',
         'posts_per_page'            => $default_posts_per_page,
         'exclude_posts'             => '',
+        'exclude_current_post'      => 'false',
         'thumbnail_size'            => 'thumbnail',
         'random_thumbnail'          => 'false',
         'layout'                    => 'basic',
@@ -186,8 +192,24 @@ function lptw_display_recent_posts ( $atts ) {
         'override_colors'           => 'false',
         'excerpt_show'              => 'true',
         'excerpt_lenght'            => '35',
-        'ignore_more_tag'           => 'false'
+        'ignore_more_tag'           => 'false',
+        'post_offset'               => 0,
+        'read_more_show'            => 'false',
+        'read_more_inline'          => 'false',
+        'read_more_content'         => 'Read more &rarr;',
+        'link_target'               => 'self',
+        'show_subtitle'             => 'true'
     ), $atts );
+
+    /* get the list of the post categories */
+    if ($a['category_id'] == 'same_as_post') {
+        $post_categories = get_the_category();
+        if ( !empty($post_categories) ) {
+            foreach ($post_categories as $category) {
+                if ( $category->taxonomy == 'category' ) { $post_category[] = $category->term_id; }
+            }
+        }
+    }
 
     /* ------------------------------------ WP_Query arguments filter start ------------------------------------ */
     if ($a['no_thumbnails'] == 'hide') { $meta_key = '_thumbnail_id'; }
@@ -197,6 +219,10 @@ function lptw_display_recent_posts ( $atts ) {
         $exclude_post = explode(',', $a['exclude_posts']);
         }
     else { $exclude_post = ''; }
+    if ($a['exclude_current_post'] == 'true') {
+        $current_post = get_the_ID();
+        $exclude_post[] = $current_post;
+    }
 
     if ( strpos($a['authors_id'], ',') !== false ) {
         $authors_id = array_map('intval', explode(',', $a['authors_id']));
@@ -204,7 +230,9 @@ function lptw_display_recent_posts ( $atts ) {
 
     if ( strpos($a['category_id'], ',') !== false ) {
         $post_category = array_map('intval', explode(',', $a['category_id']));
-    } else { $post_category = (integer) $a['category_id']; }
+    } else if ( $a['category_id'] != 'same_as_post' ) {
+        $post_category = (integer) $a['category_id'];
+    }
 
     $tax_query = '';
 
@@ -242,10 +270,28 @@ function lptw_display_recent_posts ( $atts ) {
         'tax_query'             => $tax_query,
         'order'                 => $a['order'],
         'orderby'               => $a['orderby'],
-        'meta_key'              => $meta_key
+        'meta_key'              => $meta_key,
+        'offset'                => $a['post_offset']
         );
 
     /* ------------------------------------ WP_Query arguments filter end ------------------------------------ */
+
+    /* link target start */
+    if ( $a['link_target'] == 'new' ) { $link_target = '_blank'; }
+    else { $link_target = '_self'; }
+    /* link target end */
+
+    /* date, title and subtitle position start */
+    if ( $a['show_date_before_title'] == 'true' ) {
+        $date_pos = 1;
+        $title_pos = 2;
+    } else {
+        $date_pos = 2;
+        $title_pos = 1;
+    }
+    $subtitle_pos = 3;
+    /* date, title and subtitle position end */
+
 
     $lptw_shortcode_query = new WP_Query( $lptw_shortcode_query_args );
     if( $lptw_shortcode_query->have_posts() ) {
@@ -261,6 +307,9 @@ function lptw_display_recent_posts ( $atts ) {
             $post_date = get_the_date($a['date_format']);
             $post_time = get_the_date($a['time_format']);
             $post_date_time = render_post_date($a, $post_date, $post_time);
+            $post_subtitle = get_post_meta( $post_id, 'lptw_post_subtitle', true );
+            if ( $post_subtitle != '' && $a['show_subtitle'] == 'true') { $post_subtitle_show = true; }
+            else { $post_subtitle_show = false; }
 
             $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), $a['thumbnail_size'] );
             $url = $thumb['0'];
@@ -308,29 +357,23 @@ function lptw_display_recent_posts ( $atts ) {
                     $overlay_style = '';
                     $img_class = 'fluid-image-wrapper';
                     $img_content = '<img src="'.$url.'" alt="'.get_the_title().'" class="fluid" />';
+                    $layout_class = 'layout-'.$a['color_scheme'];
                     }
                 else {
                     $overlay_class = Array ('user-overlay', 'lptw-thumbnail-noimglink');
                     $overlay_style = Array( 'background-color' => $a['background_color'] );
                     $img_content = '';
                     $img_class = '';
-                    $a['color-scheme'] = 'user';
+                    $a['color_scheme'] = 'user';
                     }
 
                 if ( $a['override_colors'] == 'true' ) { $user_text_color = 'style="color: '.$a['text_color'].';"'; }
                 else { $user_text_color = ''; }
 
-                if ( $a['show_date_before_title'] == 'true' ) {
-                    $date_pos = 1;
-                    $title_pos = 2;
-                } else {
-                    $date_pos = 1;
-                    $title_pos = 2;
-                }
-
                 $layout_classes = Array (
                     0 => 'basic-layout',
-                    1 => $column_class
+                    1 => $column_class,
+                    2 => $layout_class
                 );
 
                 /* array with layout settings */
@@ -351,6 +394,7 @@ function lptw_display_recent_posts ( $atts ) {
                         'display' => true,
                         'tag' => 'a',
                         'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => $overlay_class,
                         'style' => $overlay_style,
                         'id' => ''
@@ -378,23 +422,34 @@ function lptw_display_recent_posts ( $atts ) {
                     ),
                     $date_pos => Array (
                         'container' => 'title',
-                        'display' => (bool) $a['show_date'],
+                        'display' => $a['show_date'],
                         'tag' => 'a',
+                        'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => Array ('lptw-post-date', 'date-'.$a['color_scheme'] ),
                         'style' => $user_text_color,
                         'id' => '',
-                        'href' => get_the_permalink(),
                         'content' => $post_date_time
                     ),
                     $title_pos => Array (
                         'container' => 'title',
                         'display' => true,
                         'tag' => 'a',
+                        'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => Array( 'lptw-post-title', 'title-'.$a['color_scheme'] ),
                         'style' => $user_text_color,
                         'id' => '',
-                        'href' => get_the_permalink(),
                         'content' => get_the_title()
+                    ),
+                    $subtitle_pos => Array (
+                        'container' => 'title',
+                        'display' => $post_subtitle_show,
+                        'tag' => 'span',
+                        'class' => Array( 'lptw-post-subtitle', 'subtitle-'.$a['color_scheme'] ),
+                        'style' => $user_text_color,
+                        'id' => '',
+                        'content' => $post_subtitle
                     )
                 );
 
@@ -416,14 +471,6 @@ function lptw_display_recent_posts ( $atts ) {
                 } else {
                     $img_class = 'lptw-thumbnail-link';
                     $link_content = '<img src="'.$thumbnail['0'].'" width="'.$thumbnail[1].'" height="'.$thumbnail[2].'" alt="'.$title.'" />';
-                }
-
-                if ( $a['show_date_before_title'] == 'true' ) {
-                    $date_pos = 1;
-                    $title_pos = 2;
-                } else {
-                    $date_pos = 2;
-                    $title_pos = 1;
                 }
 
                 $layout_classes = Array (
@@ -468,6 +515,7 @@ function lptw_display_recent_posts ( $atts ) {
                         'display' => true,
                         'tag' => 'a',
                         'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => $img_class,
                         'style' => $img_style,
                         'id' => '',
@@ -475,7 +523,7 @@ function lptw_display_recent_posts ( $atts ) {
                     ),
                     $date_pos => Array (
                         'container' => 'title',
-                        'display' => (bool) $a['show_date'],
+                        'display' => $a['show_date'],
                         'tag' => 'span',
                         'class' => 'lptw-post-date',
                         'style' => '',
@@ -486,11 +534,21 @@ function lptw_display_recent_posts ( $atts ) {
                         'container' => 'title',
                         'display' => true,
                         'tag' => 'a',
+                        'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => 'lptw-post-title',
                         'style' => '',
                         'id' => '',
-                        'href' => get_the_permalink(),
                         'content' => $title
+                    ),
+                    $subtitle_pos => Array (
+                        'container' => 'title',
+                        'display' => $post_subtitle_show,
+                        'tag' => 'span',
+                        'class' => Array( 'lptw-post-subtitle' ),
+                        'style' => '',
+                        'id' => '',
+                        'content' => $post_subtitle
                     )
                 );
 
@@ -559,11 +617,21 @@ function lptw_display_recent_posts ( $atts ) {
                         'container' => 'title',
                         'display' => true,
                         'tag' => 'a',
+                        'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => 'lptw-dropcap-date-link',
                         'style' => '',
                         'id' => '',
-                        'href' => get_the_permalink(),
                         'content' => get_the_title()
+                    ),
+                    3 => Array (
+                        'container' => 'title',
+                        'display' => $post_subtitle_show,
+                        'tag' => 'span',
+                        'class' => Array( 'lptw-post-subtitle' ),
+                        'style' => '',
+                        'id' => '',
+                        'content' => $post_subtitle
                     )
                 );
 
@@ -572,7 +640,7 @@ function lptw_display_recent_posts ( $atts ) {
                  **/
                 $content .= render_article ($layout_classes, $element_style_args, $layout_sections, $layout_containers, $layout_objects);
 
-            /* Responsive Grid - recent posts with thumbnail and featured posts */
+            /* --------- Responsive Grid - recent posts with thumbnail and featured posts --------- */
             } elseif ($a['layout'] == 'grid-medium' ) {
                 /* get meta values */
                 $featured = get_post_meta ($post_id, 'featured_post', true);
@@ -581,15 +649,6 @@ function lptw_display_recent_posts ( $atts ) {
 
                 /* get embedded video frame code */
                 $embedded_video_frame = lptw_get_first_embed_media($post_id);
-
-                /* set date and time position */
-                if ( $a['show_date_before_title'] == 'true' ) {
-                    $date_pos = 1;
-                    $title_pos = 2;
-                } else {
-                    $date_pos = 1;
-                    $title_pos = 2;
-                }
 
                 /* ------------ start calculate featured and base height and width ------------ */
                 $featured_height = $a['featured_height'] . 'px';
@@ -628,16 +687,15 @@ function lptw_display_recent_posts ( $atts ) {
                 );
 
                 if ($featured == 'on') {
-                    $display_post_header = false;
                     array_push($layout_classes, 'lptw-featured');
                     $thumb_grid = wp_get_attachment_image_src( get_post_thumbnail_id($post_id), 'lptw-grid-large' );
 
                     if ( $embedded_video != 'on' ) {
+                        $display_post_header = 'true';
                         $element_style_args['background'] = 'url('.$thumb_grid['0'].') center center no-repeat';
                         $element_style_args['background-size'] = 'cover';
                         $title_show = true;
 
-                        /* featured content start */
                         /* image start */
                         $img_tag = 'a';
                         $img_href = get_the_permalink();
@@ -645,8 +703,8 @@ function lptw_display_recent_posts ( $atts ) {
                         $img_content = '<div class="overlay overlay-'.$a['color_scheme'].'"></div>';
                         /* image end */
 
-                        /* featured content end */
                     } else {
+                        $display_post_header = 'false';
                         $title_show = false;
                         $img_tag = 'div';
                         $img_href = '';
@@ -657,7 +715,7 @@ function lptw_display_recent_posts ( $atts ) {
                     }
 
                 } else {
-                    $display_post_header = true;
+                    $display_post_header = 'true';
                     array_push($layout_classes, 'grid-element-'.$a['color_scheme']);
 
                     /* image start */
@@ -681,7 +739,7 @@ function lptw_display_recent_posts ( $atts ) {
 
                 /* ------------ the post excerpt start ------------ */
                 if ($a['excerpt_show'] == 'true' && $featured != 'on') {
-                    $excerpt_display = true;
+                    $excerpt_display = 'true';
                     $manual_excerpt = $lptw_shortcode_query->post->post_excerpt;
                     if ( !empty($manual_excerpt) ) {
                         $post_excerpt = $manual_excerpt;
@@ -689,13 +747,17 @@ function lptw_display_recent_posts ( $atts ) {
                         $post_excerpt = lptw_custom_excerpt($a['excerpt_lenght'], $a['ignore_more_tag']);
                     }
                 } else { $excerpt_display = false; }
+                if ($a['read_more_show'] == 'true' && $a['read_more_inline'] == 'true' ) {
+                    $excerpt_style = Array ( 'display' => 'inline' );
+                    $read_more_style = Array ( 'margin-left' => '5px', 'display' => 'inline' );
+                    }
                 /* ------------ the post excerpt end ------------ */
 
                 /* array with layout settings */
                 $layout_sections = Array (
                     0 => Array (
                         'type' => 'header',
-                        'display' => true,
+                        'display' => 'true',
                         'id' => ''
                     ),
                     1 => Array (
@@ -714,7 +776,7 @@ function lptw_display_recent_posts ( $atts ) {
                     0 => Array (
                         'place' => 'header',
                         'name' => 'image',
-                        'display' => true,
+                        'display' => 'true',
                         'class' => 'lptw-post-grid-link',
                         'style' => '',
                         'id' => ''
@@ -741,13 +803,15 @@ function lptw_display_recent_posts ( $atts ) {
                 * 1 - image or video
                 * 2 - post title
                 * 3 - post date
-                * 4 - post excerpt
+                * 4 - post subtitle
+                * 5 - post excerpt
+                * 6 - read more link
                 */
 
                 $layout_objects = Array (
                     0 => Array (
                         'container' => 'image',
-                        'display' => true,
+                        'display' => 'true',
                         'tag' => $img_tag,
                         'href' => $img_href,
                         'class' => $img_class,
@@ -757,9 +821,10 @@ function lptw_display_recent_posts ( $atts ) {
                     ),
                     $date_pos => Array (
                         'container' => 'title',
-                        'display' => (bool) $a['show_date'],
+                        'display' => $a['show_date'],
                         'tag' => 'a',
                         'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => Array ( 'lptw-post-date', 'date-'.$a['color_scheme'] ),
                         'style' => $user_text_color,
                         'id' => '',
@@ -767,22 +832,43 @@ function lptw_display_recent_posts ( $atts ) {
                     ),
                     $title_pos => Array (
                         'container' => 'title',
-                        'display' => true,
+                        'display' => 'true',
                         'tag' => 'a',
                         'href' => get_the_permalink(),
+                        'target' => $link_target,
                         'class' => Array ( 'lptw-post-title', 'title-'.$a['color_scheme'] ),
                         'style' => $user_text_color,
                         'id' => '',
                         'content' => get_the_title()
                     ),
-                    3 => Array (
+                    $subtitle_pos => Array (
+                        'container' => 'title',
+                        'display' => $post_subtitle_show,
+                        'tag' => 'span',
+                        'class' => Array( 'lptw-post-subtitle', 'subtitle-'.$a['color_scheme'] ),
+                        'style' => $user_text_color,
+                        'id' => '',
+                        'content' => $post_subtitle
+                    ),
+                    4 => Array (
                         'container' => 'excerpt',
                         'display' => $excerpt_display,
                         'tag' => 'div',
                         'class' => '',
-                        'style' => '',
+                        'style' => $excerpt_style,
                         'id' => '',
                         'content' => $post_excerpt
+                    ),
+                    5 => Array (
+                        'container' => 'excerpt',
+                        'display' => $a['read_more_show'],
+                        'tag' => 'a',
+                        'href' => get_the_permalink(),
+                        'target' => $link_target,
+                        'class' => Array ( 'read-more-link', 'link-'.$a['color_scheme'] ),
+                        'style' => $read_more_style,
+                        'id' => '',
+                        'content' => $a['read_more_content']
                     )
                 );
 
@@ -811,7 +897,6 @@ function lptw_display_recent_posts ( $atts ) {
                                             $(".lptw-grid-element").css("width", "100%");
                                             countedColumnWidth = containerWidth - 1;
                                         } else if (containerWidth > 640) {
-                                            console.log(containerWidth);
                                             $(".lptw-grid-element").css("width", "'.$normal_width.'");
                                             $(".lptw-featured").css("width", "'.$featured_width.'");
                                             if (fluid_images === true) {

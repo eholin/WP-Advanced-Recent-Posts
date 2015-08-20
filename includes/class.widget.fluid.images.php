@@ -68,10 +68,14 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
 		$show_title_before = isset( $instance['show_title_before'] ) ? $instance['show_title_before'] : true;
 
+		$show_subtitle = isset( $instance['show_subtitle'] ) ? $instance['show_subtitle'] : true;
+
 		$color_scheme = isset( $instance['color_scheme'] ) ? $instance['color_scheme'] : 'light';
 
 		$post_category = isset( $instance['post_category'] ) ? $instance['post_category'] : array();
         if (!empty($post_category)) { $post_category_str = implode (',', $post_category); }
+
+		$same_post_category = isset( $instance['same_post_category'] ) ? $instance['same_post_category'] : false;
 
 		$authors = isset( $instance['authors'] ) ? $instance['authors'] : array();
 
@@ -98,6 +102,16 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 
         if ($no_thumbnails == 'on') { $meta_key = '_thumbnail_id'; }
         else { $meta_key = ''; }
+
+        /* get the list of the post categories */
+        if ($same_post_category == true) {
+            $post_categories = get_the_category();
+            if ( !empty($post_categories) ) {
+                foreach ($post_categories as $category) {
+                    if ( $category->taxonomy == 'category' ) { $post_category[] = $category->term_id; }
+                }
+            }
+        }
 
 		$r = new WP_Query( apply_filters( 'widget_posts_args', array(
 			'post_type'             => $post_type,
@@ -132,12 +146,15 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
                 else { $post_date_time = $post_date . ' ' . $post_time; }
             }
             else { $post_date_time = $post_date; }
+
+            $post_id = get_the_ID();
+            $post_subtitle = get_post_meta( $post_id, 'lptw_post_subtitle', true );
         ?>
 
 
 			<li>
                 <?php if ( has_post_thumbnail() ) :
-                    $thumb = wp_get_attachment_image_src( get_post_thumbnail_id($r->post_ID), 'large' );
+                    $thumb = wp_get_attachment_image_src( get_post_thumbnail_id(), 'large' );
                     $url = $thumb['0'];
                 ?>
 				<div class="lptw-post-thumbnail">
@@ -146,6 +163,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         		    	<?php if ( $show_title_before == true ) : ?>
             		    	<?php if ( $show_post_title ) : ?>
         		    		<span class="lptw-post-title title-<?php echo $color_scheme; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
+            			    <?php endif; ?>
+            		    	<?php if ( $show_subtitle == true ) : ?>
+        		    		<span class="lptw-post-subtitle subtitle-<?php echo $color_scheme; ?>"><?php echo $post_subtitle; ?></span>
             			    <?php endif; ?>
             		    	<?php if ( $show_date == true ) : ?>
         	    			<span class="lptw-post-date date-<?php echo $color_scheme; ?>"><?php echo $post_date_time; ?></span>
@@ -156,6 +176,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
             			    <?php endif; ?>
             		    	<?php if ( $show_post_title ) : ?>
         		    		<span class="lptw-post-title title-<?php echo $color_scheme; ?>"><?php get_the_title() ? the_title() : the_ID(); ?></span>
+            			    <?php endif; ?>
+            		    	<?php if ( $show_subtitle == true ) : ?>
+        		    		<span class="lptw-post-subtitle subtitle-<?php echo $color_scheme; ?>"><?php echo $post_subtitle; ?></span>
             			    <?php endif; ?>
             			<?php endif; ?>
                     </div>
@@ -211,6 +234,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         if ( isset( $instance[ 'show_title_before' ] ) ) { $show_title_before = (bool) $instance[ 'show_title_before' ]; }
         else { $show_title_before = false; }
 
+        if ( isset( $instance[ 'show_subtitle' ] ) ) { $show_subtitle = (bool) $instance[ 'show_subtitle' ]; }
+        else { $show_subtitle = false; }
+
         if ( isset( $instance[ 'show_date' ] ) ) { $show_date = (bool) $instance[ 'show_date' ]; }
         else { $show_date = false; }
 
@@ -230,6 +256,8 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
         else { $color_scheme = 'light'; }
 
         if ( isset( $instance[ 'post_category' ] ) ) { $post_category = $instance[ 'post_category' ]; }
+
+        if ( isset( $instance[ 'same_post_category' ] ) ) { $same_post_category = $instance[ 'same_post_category' ]; }
 
         if ( isset( $instance[ 'authors' ] ) ) { $authors = $instance[ 'authors' ]; }
 
@@ -288,6 +316,10 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
                 </ul>
             </fieldset>
             <p class="description">If none of the categories is selected - will be displayed posts from all categories.</p>
+
+    		<p class="lptw-inner-option"><input class="checkbox" type="checkbox" <?php checked( $same_post_category ); ?> id="<?php echo $this->get_field_id( 'same_post_category' ); ?>" name="<?php echo $this->get_field_name( 'same_post_category' ); ?>" />
+	    	<label for="<?php echo $this->get_field_id( 'same_post_category' ); ?>"><?php _e( 'Use the same category, where is the post. This option override selected categories.', 'lptw_recent_posts_domain' ); ?></label></p>
+
         </div>
 
         <div class="chosen-container"><label for="<?php echo $this->get_field_id( 'authors' ); ?>"><?php _e( 'Select one or more authors:', 'lptw_recent_posts_domain' ); ?></label>
@@ -355,6 +387,9 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( $show_title_before ); ?> id="<?php echo $this->get_field_id( 'show_title_before' ); ?>" name="<?php echo $this->get_field_name( 'show_title_before' ); ?>" />
 		<label for="<?php echo $this->get_field_id( 'show_title_before' ); ?>"><?php _e( 'Display post title before post date and time?', 'lptw_recent_posts_domain' ); ?></label></p>
 
+		<p><input class="checkbox" type="checkbox" <?php checked( $show_subtitle ); ?> id="<?php echo $this->get_field_id( 'show_subtitle' ); ?>" name="<?php echo $this->get_field_name( 'show_subtitle' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'show_subtitle' ); ?>"><?php _e( 'Display post subtitle?', 'lptw_recent_posts_domain' ); ?></label></p>
+
 		<p>
 			<label for="<?php echo $this->get_field_id('color_scheme'); ?>"><?php _e( 'Color scheme:', 'lptw_recent_posts_domain' ); ?></label>
 			<select name="<?php echo $this->get_field_name( 'color_scheme' ); ?>" id="<?php echo $this->get_field_id('color_scheme'); ?>" class="widefat">
@@ -373,11 +408,13 @@ class lptw_recent_posts_fluid_images_widget extends WP_Widget {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['show_widget_title'] = isset( $new_instance['show_widget_title'] ) ? (bool) $new_instance['show_widget_title'] : false;
 		$instance['exclude_current_post'] = isset( $new_instance['exclude_current_post'] ) ? (bool) $new_instance['exclude_current_post'] : false;
+		$instance['same_post_category'] = isset( $new_instance['same_post_category'] ) ? (bool) $new_instance['same_post_category'] : false;
 		$instance['no_thumbnails'] = isset( $new_instance['no_thumbnails'] ) ? (bool) $new_instance['no_thumbnails'] : false;
 		$instance['reverse_post_order'] = isset( $new_instance['reverse_post_order'] ) ? (bool) $new_instance['reverse_post_order'] : false;
 		$instance['number'] = (int) $new_instance['number'];
 		$instance['show_post_title'] = isset( $new_instance['show_post_title'] ) ? (bool) $new_instance['show_post_title'] : false;
 		$instance['show_title_before'] = isset( $new_instance['show_title_before'] ) ? (bool) $new_instance['show_title_before'] : false;
+		$instance['show_subtitle'] = isset( $new_instance['show_subtitle'] ) ? (bool) $new_instance['show_subtitle'] : false;
 		$instance['show_date'] = isset( $new_instance['show_date'] ) ? (bool) $new_instance['show_date'] : false;
 		$instance['date_format'] = strip_tags($new_instance['date_format']);
 		$instance['time_format'] = strip_tags($new_instance['time_format']);
