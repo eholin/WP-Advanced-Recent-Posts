@@ -353,21 +353,21 @@ function lptw_display_recent_posts ( $atts ) {
             /* ---------- basic layout (fluid images) - fixed or adaptive width, multiple columns ---------- */
             if ($a['layout'] == 'basic' ) {
                 if ($url != '') {
-                    $overlay_class = Array ('overlay', 'overlay-'.$a['color_scheme'], 'lptw-post-thumbnail-link');
+                    $overlay_class = Array ( 'overlay', 'overlay-'.$a['color_scheme'], 'lptw-post-thumbnail-link' );
                     $overlay_style = '';
                     $img_class = 'fluid-image-wrapper';
                     $img_content = '<img src="'.$url.'" alt="'.get_the_title().'" class="fluid" />';
                     $layout_class = 'layout-'.$a['color_scheme'];
                     }
                 else {
-                    $overlay_class = Array ('user-overlay', 'lptw-thumbnail-noimglink');
+                    $overlay_class = Array ( 'overlay', 'overlay-'.$a['color_scheme'], 'lptw-thumbnail-noimglink' );
                     $overlay_style = Array( 'background-color' => $a['background_color'] );
                     $img_content = '';
                     $img_class = '';
-                    $a['color_scheme'] = 'user';
+                    /*$a['color_scheme'] = 'user';*/
                     }
 
-                if ( $a['override_colors'] == 'true' ) { $user_text_color = 'style="color: '.$a['text_color'].';"'; }
+                if ( $a['override_colors'] == 'true' ) { $user_text_color = Array ('color' => $a['text_color']); }
                 else { $user_text_color = ''; }
 
                 $layout_classes = Array (
