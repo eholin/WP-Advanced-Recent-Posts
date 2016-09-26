@@ -22,10 +22,14 @@ Better to see once than read a hundred times - see the [live demo](http://demo.l
 
 # Changelog
 
+## 0.6.15 beta 2
+* Added overlay to Featured Images at the Responsive (Masonry) grid
+* Fixed issue with color styles of Featured Images at the Responsive grid
+
 ## 0.6.15 beta 1
 * All js-code moved to lptw-recent-posts.js
-* Fixed issue with delay of the Masonry grid activation
-* Fixed issue with height in the responsive Masonry grid
+* Fixed issue with delay of the Responsive (Masonry) grid activation
+* Fixed issue with height in the Responsive grid
 
 ## 0.6.14
 * Added support of post offset.

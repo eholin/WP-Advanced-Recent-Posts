@@ -688,48 +688,54 @@ ul.lptw-recent-posts-thumbnails-widget {
 	color: #333333;
 }
 
-.lptw-featured a:hover,
-.lptw-featured a:visited,
-.lptw-featured a:active,
-.lptw-featured a:focus {
+.lptw-featured.grid-element-dark a:hover,
+.lptw-featured.grid-element-dark a:visited,
+.lptw-featured.grid-element-dark a:active,
+.lptw-featured.grid-element-dark a:focus {
 	color: #ffffff;
 	outline: none;
 }
 
 .lptw-featured .lptw-post-date {
 	font-size: 1.5em;
+}
+
+.lptw-featured.grid-element-dark .lptw-post-date {
 	color: #ffffff;
 }
 
-.lptw-featured .lptw-post-date:hover,
-.lptw-featured .lptw-post-date:visited,
-.lptw-featured .lptw-post-date:active,
-.lptw-featured .lptw-post-date:focus {
+.lptw-featured.grid-element-dark .lptw-post-date:hover,
+.lptw-featured.grid-element-dark .lptw-post-date:visited,
+.lptw-featured.grid-element-dark .lptw-post-date:active,
+.lptw-featured.grid-element-dark .lptw-post-date:focus {
 	color: #eeeeee;
 	outline: none;
 }
 
 .lptw-featured .lptw-post-title {
 	font-size: 1.75em;
+}
+
+.lptw-featured.grid-element-dark .lptw-post-title {
 	color: #ffffff;
 }
 
-.lptw-featured .lptw-post-title:hover,
-.lptw-featured .lptw-post-title:visited,
-.lptw-featured .lptw-post-title:active,
-.lptw-featured .lptw-post-title:focus {
+.lptw-featured.grid-element-dark .lptw-post-title:hover,
+.lptw-featured.grid-element-dark .lptw-post-title:visited,
+.lptw-featured.grid-element-dark .lptw-post-title:active,
+.lptw-featured.grid-element-dark .lptw-post-title:focus {
 	color: #eeeeee;
 	outline: none;
 }
 
-.lptw-featured .lptw-post-subtitle {
+.lptw-featured.grid-element-dark .lptw-post-subtitle {
 	color: #ffffff;
 }
 
-.lptw-featured .lptw-post-subtitle:hover,
-.lptw-featured .lptw-post-subtitle:visited,
-.lptw-featured .lptw-post-subtitle:active,
-.lptw-featured .lptw-post-subtitle:focus {
+.lptw-featured.grid-element-dark .lptw-post-subtitle:hover,
+.lptw-featured.grid-element-dark .lptw-post-subtitle:visited,
+.lptw-featured.grid-element-dark .lptw-post-subtitle:active,
+.lptw-featured.grid-element-dark .lptw-post-subtitle:focus {
 	color: #eeeeee;
 	outline: none;
 }

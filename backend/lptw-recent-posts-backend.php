@@ -273,7 +273,7 @@ function lptw_recent_posts_manage_shortcodes() {
                         <option value="light">Light</option>
                     	<option value="dark" selected="selected">Dark</option>
                     </select>
-                    <p class="description">Only for Basic layout.</p>
+                    <p class="description">Only for the Basic and the Responsive Grid layouts.</p>
                 </td>
             </tr>
             <tr>

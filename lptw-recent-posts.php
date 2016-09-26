@@ -413,21 +413,24 @@ function lptw_display_recent_posts( $atts ) {
 
 			/* ------------------------------------ start layouts output ------------------------------------ */
 
+			$overlay_class = 'overlay-' . $a['color_scheme'];
+
+			if ( $url != '' ) {
+				$overlay_class = array( 'overlay', $overlay_class, 'lptw-post-thumbnail-link' );
+				$overlay_style = '';
+				$img_class = 'fluid-image-wrapper';
+				$img_content = '<img src="' . $url . '" alt="' . get_the_title() . '" class="fluid" />';
+				$layout_class = 'layout-' . $a['color_scheme'];
+			} else {
+				$overlay_class = array( 'overlay', $overlay_class, 'lptw-thumbnail-noimglink' );
+				$overlay_style = array( 'background-color' => $a['background_color'] );
+				$img_content = '';
+				$img_class = '';
+				/*$a['color_scheme'] = 'user';*/
+			}
+
 			/* ---------- basic layout (fluid images) - fixed or adaptive width, multiple columns ---------- */
 			if ( $a['layout'] == 'basic' ) {
-				if ( $url != '' ) {
-					$overlay_class = Array( 'overlay', 'overlay-' . $a['color_scheme'], 'lptw-post-thumbnail-link' );
-					$overlay_style = '';
-					$img_class = 'fluid-image-wrapper';
-					$img_content = '<img src="' . $url . '" alt="' . get_the_title() . '" class="fluid" />';
-					$layout_class = 'layout-' . $a['color_scheme'];
-				} else {
-					$overlay_class = Array( 'overlay', 'overlay-' . $a['color_scheme'], 'lptw-thumbnail-noimglink' );
-					$overlay_style = Array( 'background-color' => $a['background_color'] );
-					$img_content = '';
-					$img_class = '';
-					/*$a['color_scheme'] = 'user';*/
-				}
 
 				if ( $a['override_colors'] == 'true' ) {
 					$user_text_color = Array( 'color' => $a['text_color'] );
@@ -739,7 +742,7 @@ function lptw_display_recent_posts( $atts ) {
 				/* ------------ finish create styles ------------ */
 
 				/* set the layout classes */
-				$layout_classes = Array(
+				$layout_classes = array(
 					'grid-layout',
 					'lptw-grid-element',
 				);
@@ -753,6 +756,9 @@ function lptw_display_recent_posts( $atts ) {
 						$element_style_args['background'] = 'url(' . $thumb_grid['0'] . ') center center no-repeat';
 						$element_style_args['background-size'] = 'cover';
 						$title_show = TRUE;
+
+						// overlay only on the image
+						$layout_classes = array_merge( $layout_classes, $overlay_class );
 
 						/* image start */
 						$img_tag = 'a';
@@ -940,73 +946,6 @@ function lptw_display_recent_posts( $atts ) {
 			$i ++;
 		} // end while( $lptw_shortcode_query->have_posts() )
 		$content .= '</div>';
-		if ( $a['layout'] == 'grid-medium' ) {
-			/*
-			$content .= '<script>
-                            jQuery(window).on("load", function() {
-                              var $ = jQuery;
-                              $(".overlay").css("display", "block");
-                              var $container = $("#lptw-grid-' . $rand_grid . '");
-                              var fluid_images = ' . $a['fluid_images'] . ';
-                              var countedColumnWidth;
-
-                              // initialize
-                              $container.masonry({
-                                  itemSelector: ".lptw-grid-element",';
-			if ( $a['fluid_images'] != 'true' ) {
-				$content .= 'gutter: ' . $a['space_hor'] . ',';
-			}
-			$content .= '     columnWidth: function(containerWidth) {
-                                        if (containerWidth < 641) {
-                                            $(".lptw-grid-element").css("width", "100%");
-                                            countedColumnWidth = containerWidth - 1;
-                                        } else if (containerWidth > 640) {
-                                            $(".lptw-grid-element").css("width", "' . $normal_width . '");
-                                            $(".lptw-featured").css("width", "' . $featured_width . '");
-                                            if (fluid_images === true) {
-                                        	    countedColumnWidth = (containerWidth / ' . $a['columns'] . ') - 1
-                                            } else {
-                                        	    countedColumnWidth = ' . $a['width'] . ' - 1
-                                            }
-                                        }
-                                        return countedColumnWidth;
-                                  }';
-			$content .= '     });
-
-                                $(window).resize(function() {
-                                	var $container = $("#grid-container");
-                                	var viewport = $(window).width();
-                                    var fluid_images = ' . $a['fluid_images'] . ';
-
-                                	if (viewport < 641) {
-                                        $(".lptw-grid-element").css("width", "100%");
-                                        $(".lptw-grid-element").css("height", "auto");
-                                		$container.masonry("option", {
-                                			columnWidth: viewport - 1
-                                		});
-                                	} else if (viewport > 640) {
-                                        var containerWidth = $container.width();
-                                        $(".lptw-grid-element").css("width", "' . $normal_width . '");
-                                        $(".lptw-featured").css("width", "' . $featured_width . '");
-
-                                        if (fluid_images === true) {
-                                    		$container.masonry("option", {
-                                    			columnWidth: (containerWidth / ' . $a['columns'] . ') - 1
-                                    		});
-                                        } else {
-                                            $(".lptw-featured").css("height", "' . $a['height'] . '");
-                                    		$container.masonry("option", {
-                                    			columnWidth: ' . $a['width'] . ' - 1
-                                    		});
-                                        }
-                                    }
-                                });
-
-                            });
-
-                        </script>';
-			*/
-		}
 	} else {
 		$content = __( 'No recent posts', 'lptw_recent_posts_domain' );
 	}
