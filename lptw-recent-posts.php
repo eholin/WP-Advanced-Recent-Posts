@@ -18,7 +18,8 @@ function lptw_recent_posts_register_scripts() {
 
     wp_enqueue_script( 'lptw-recent-posts-script', plugins_url( 'lptw-recent-posts.js', __FILE__ ), array('jquery', 'jquery-masonry'), false, true );
 }
-add_action( 'wp_enqueue_scripts', 'lptw_recent_posts_register_scripts' );
+//Not using Add Action anymore, as the function loading Scripts and CSS is called directly from Widget and from ShortCode initialization
+//add_action( 'wp_enqueue_scripts', 'lptw_recent_posts_register_scripts' );
 
 /* register custom image size for Grid Layout */
 function lptw_recent_posts_activate () {
@@ -140,6 +141,8 @@ include( plugin_dir_path( __FILE__ ) . 'includes/class.widget.small.thumbnails.p
 
 /* Register and load the widget */
 function lptw_recent_posts_load_widget() {
+    //Scripts and CSS are loaded only when the widget is initialized.
+    lptw_recent_posts_register_scripts();
 	register_widget( 'lptw_recent_posts_fluid_images_widget' );
 	register_widget( 'lptw_recent_posts_thumbnails_widget' );
 }
@@ -153,6 +156,9 @@ add_action( 'widgets_init', 'lptw_recent_posts_load_widget' );
 include( plugin_dir_path( __FILE__ ) . 'includes/class.render.layout.php');
 
 function lptw_display_recent_posts ( $atts ) {
+    //Scripts and CSS are loaded only when the [lptw_recentposts] shortcode is called at the page.
+    lptw_recent_posts_register_scripts();
+
     $default_posts_per_page =  get_option( 'posts_per_page', '10' );
 
     $a = shortcode_atts( array(
